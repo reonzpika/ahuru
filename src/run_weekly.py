@@ -5,6 +5,7 @@ Orchestrates the full weekly SEO report pipeline:
   2. Analyse into insight buckets
   3. Generate report via Claude API
   4. Save to /reports/
+  5. Email report via Resend
 
 Run locally:   python src/run_weekly.py
 GitHub Actions: called by .github/workflows/weekly_report.yml
@@ -14,6 +15,8 @@ import json
 import os
 import sys
 from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv()
 
 # Add src/ to path so imports work when called from repo root
 sys.path.insert(0, os.path.dirname(__file__))
@@ -21,6 +24,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from gsc_fetch import fetch_all_data
 from analyse import analyse
 from report import generate_report, save_report
+from email_report import send_report
 
 
 def main():
@@ -50,8 +54,8 @@ def main():
     print("-" * 40)
     analysis = analyse(raw_data)
 
-    print(f"\nSummary:")
     summary = analysis["summary"]
+    print(f"\nSummary:")
     print(f"  Ranked pages (90d):      {summary['ranked_pages_90d']}")
     print(f"  Total clicks (90d):      {summary['total_clicks_90d']:,}")
     print(f"  Total impressions (90d): {summary['total_impressions_90d']:,}")
@@ -71,10 +75,23 @@ def main():
     print("-" * 40)
     report_path = save_report(report_text)
 
+    # ── Step 5: Email ────────────────────────────────────────────────
+    print("\nSTEP 5: Sending email via Resend")
+    print("-" * 40)
+    resend_key = os.environ.get("RESEND_API_KEY")
+    if resend_key:
+        try:
+            send_report(report_text, summary)
+        except Exception as e:
+            # Email failure does not fail the whole pipeline
+            print(f"Warning: Email failed (report still saved): {e}")
+    else:
+        print("RESEND_API_KEY not set — skipping email")
+
     # ── Done ─────────────────────────────────────────────────────────
     elapsed = (datetime.utcnow() - start).total_seconds()
     print(f"\n{'='*60}")
-    print(f"✓ Pipeline complete in {elapsed:.1f}s")
+    print(f"Pipeline complete in {elapsed:.1f}s")
     print(f"  Report: {report_path}")
     print(f"  Latest: reports/latest.md")
     print(f"{'='*60}")

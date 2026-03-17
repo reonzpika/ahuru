@@ -2,12 +2,10 @@ name: Weekly SEO Report
 
 on:
   schedule:
-    # Sunday 8am UTC = Sunday 8–9pm NZ time (UTC+12/+13)
-    # Adjust if you want a different day/time
+    # Sunday 8am UTC = Sunday 8-9pm NZ time (UTC+12/+13)
     - cron: "0 8 * * 0"
 
   # Allow manual trigger from GitHub Actions tab
-  # Useful for the first run and ad-hoc analysis
   workflow_dispatch:
 
 jobs:
@@ -19,11 +17,11 @@ jobs:
       contents: write   # Required to commit the report back to the repo
 
     steps:
-      # ── 1. Checkout ──────────────────────────────────────────────────────
+      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Python setup ──────────────────────────────────────────────────
+      # 2. Python setup
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -33,23 +31,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # ── 3. Run pipeline ──────────────────────────────────────────────────
-      # Credentials are passed as env vars — nothing is written to disk.
-      # Both secrets must be set in: GitHub repo → Settings → Secrets → Actions
+      # 3. Run pipeline
       - name: Run weekly report pipeline
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: python src/run_weekly.py
 
-      # ── 4. Commit report back to repo ────────────────────────────────────
-      # The report is committed so you have a versioned history in GitHub.
-      # The data/ directory is NOT committed (gitignored) to keep repo size small.
+      # 4. Commit report back to repo
       - name: Commit and push report
         run: |
           git config --global user.name  "ahuru-seo-bot"
           git config --global user.email "bot@ahurucandles.co.nz"
           git add reports/
-          # Only commit if there are changes (avoids empty commits)
           git diff --staged --quiet || git commit -m "Weekly SEO report $(date -u +%Y-%m-%d)"
           git push

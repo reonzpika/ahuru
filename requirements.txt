@@ -4,3 +4,7 @@ google-auth>=2.20.0
 
 # Claude API
 anthropic>=0.40.0
+
+python-dotenv>=1.0.0
+
+requests>=2.31.0
