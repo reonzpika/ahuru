@@ -1,0 +1,54 @@
+name: Monthly SEO Report
+
+on:
+  schedule:
+    # First Sunday of each month at 8am UTC (8-9pm NZ time)
+    # Cron cannot express "first Sunday" directly — runs every Sunday,
+    # but the script checks the date and only proceeds on the first Sunday.
+    # Alternative: run on the 1st of each month at 8am UTC if you prefer
+    # a fixed calendar date over a fixed day of week.
+    # Current: day-of-month 1-7 AND Sunday = first Sunday of month
+    - cron: "0 8 1-7 * 0"
+
+  # Manual trigger — use this to test or re-run any month
+  workflow_dispatch:
+
+jobs:
+  generate-monthly-report:
+    name: Fetch GSC data and generate monthly report
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # Required to commit the report back to the repo
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python setup ──────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── 3. Run pipeline ──────────────────────────────────────────────────
+      - name: Run monthly report pipeline
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: python src/run_monthly.py
+
+      # ── 4. Commit report back to repo ────────────────────────────────────
+      - name: Commit and push monthly report
+        run: |
+          git config --global user.name  "ahuru-seo-bot"
+          git config --global user.email "bot@ahurucandles.co.nz"
+          git add reports/monthly/
+          git diff --staged --quiet || git commit -m "Monthly SEO report $(date -u +%Y-%m)"
+          git push
