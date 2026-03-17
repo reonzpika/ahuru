@@ -2,7 +2,7 @@
 
 ## Summary
 
-Overall impressions are up 5.5% week-on-week, showing healthy visibility growth across diffuser and candle content, but clicks have dropped 16.1% — meaning the site is being seen more often but converting fewer searchers into visitors. The single biggest structural problem is the best-essential-oils-for-diffusers-guide blog post: it receives 198,496 impressions over 90 days but converts at only 0.34% CTR, and it is actively cannibalising at least seven other pages. Fix the title and meta description on that one page this week — it is leaving hundreds of clicks on the table every month.
+Overall impressions are up 5.5% week-on-week, but clicks have dropped 16.1%, signalling that rankings are holding while something is suppressing click-through across the site. The single biggest issue is the best-essential-oils-for-diffusers-guide page: it accounts for nearly half of all 90-day impressions (198,496) yet converts at just 0.34% CTR — fixing this title and description alone could double monthly clicks. This week's single most important action is rewriting the meta title and description on that guide page.
 
 ---
 
@@ -13,48 +13,46 @@ Overall impressions are up 5.5% week-on-week, showing healthy visibility growth 
 | Impressions | 23,390 | 22,175 | +5.5% |
 | Clicks | 130 | 155 | −16.1% |
 
-Impressions are rising broadly across diffuser, candle, and aromatherapy content (multiple pages up 100–360%), but clicks have fallen sharply — the gap strongly suggests meta titles and descriptions are not compelling enough to earn the click, particularly on the high-impression diffuser guide which dominates the impression pool.
+Impressions are growing across diffuser, candle, and essential oil content (multiple pages up 100–360%), but CTR has collapsed — the impression gains are not converting, likely because key meta titles do not match searcher intent closely enough.
 
 ---
 
 ## 🔴 Urgent Actions (do this week)
 
 **1.**
-- **Problem:** `https://www.ahurucandles.co.nz/blogs/guide/best-essential-oils-for-diffusers-guide` — 198,496 impressions over 90 days at 0.34% CTR. Ranking at position 4.8 on average. This page should be driving 1,000+ clicks per month; it is driving 671 over 90 days. The title and description are almost certainly generic and uncompelling. This is the single highest-leverage fix on the entire site.
-- **Fix:** Update the Shopify blog post meta title and meta description immediately. Use:
-  - **Title:** `Best Essential Oils for Diffusers (NZ Guide 2026)`
-  - **Description:** `Discover the best essential oils to use in your diffuser — from calming lavender to energising citrus. NZ-made blends, expert tips & free shipping over $75.`
-- **Why now:** At position 4.8 with nearly 200K impressions, even lifting CTR from 0.34% to 1.5% would add roughly 800 clicks per month. Every week this sits unfixed is lost revenue.
+- **Problem:** `https://www.ahurucandles.co.nz/blogs/guide/best-essential-oils-for-diffusers-guide` — 198,496 impressions over 90 days at 0.34% CTR. This page is ranking at an average position of 4.8 (near the top of page 1) and generating almost no clicks. This is the single largest untapped opportunity on the entire site.
+- **Fix:** Update the meta title and meta description immediately in Shopify (Online Store → Themes → Edit default theme content, or via the blog post editor → Search engine listing preview).
+  - **New title:** `Best Essential Oils for Diffusers — Complete NZ Guide`
+  - **New description:** `Discover the best essential oils to use in your diffuser — from lavender to eucalyptus. Shop pure essential oils, NZ-made and shipped fast. Free NZ delivery.`
+- **Why now:** A 0.34% CTR at position 4.8 is severely abnormal. Even lifting CTR to 2% would deliver roughly 400 additional monthly clicks to your highest-traffic page. Every week this stays unfixed is lost revenue.
 
 ---
 
 **2.**
-- **Problem:** `https://www.ahurucandles.co.nz/products/meri-kirihimete-christmas-card` — 55,623 impressions over 90 days at 0.05% CTR, position 5.3. It is March. This page is still being served to searchers looking for "meri kirihimete" (43,258 impressions alone) but offers nothing of value outside Christmas gifting season. It is consuming crawl equity and diluting the site's commercial signals.
-- **Fix:** Add a seasonal redirect or a prominent in-page message pointing visitors to the gift boxes collection (`/collections/` gift bundles). More importantly, update the meta title and description to either (a) make the page relevant year-round as a Māori greeting / cultural gift card landing page, or (b) add a canonical redirect to the homepage from October–November and noindex in the off-season. Immediate step: update the meta to reduce wasted impressions:
-  - **Title:** `Meri Kirihimete Card — NZ Christmas Gifts | Āhuru`
-  - **Description:** `Send a beautiful Meri Kirihimete card with any Āhuru gift box. NZ-made wellness gifts — candles, diffusers & fidget rings. Free shipping over $75.`
-- **Why now:** 43,258 impressions on "meri kirihimete" with only 14 clicks is an enormous waste. Even a modest improvement in relevance or a redirect to a gift collection captures real revenue.
+- **Problem:** `https://www.ahurucandles.co.nz/products/meri-kirihimete-christmas-card` — 55,623 impressions over 90 days at 0.05% CTR, ranking at position 5.3. "Meri Kirihimete" and its spelling variants collectively account for ~47,000+ impressions in the quick-wins data. It is now mid-March — this page is completely out of season — yet it is consuming crawl equity and appearing in results for searches where Āhuru cannot provide value right now.
+- **Fix:** Add a `<meta name="robots" content="noindex">` tag to this product page, or set it to "hidden" in Shopify until October 2026. This prevents Google continuing to serve an out-of-season page that damages overall site CTR. Redirect the URL to `/collections/scented-candles-nz` if you prefer to preserve link equity.
+- **Why now:** This page's 0.05% CTR is dragging down site-wide averages and wasting Google's crawl budget. The Christmas card product itself cannot be sold in March. Removing it from the index protects the overall site health score.
 
 ---
 
 **3.**
-- **Problem:** `https://www.ahurucandles.co.nz/blogs/guide/oil-diffuser-for-gamer-relaxation` — position 2.0 average with 2,925 impressions over 90 days but only 3 clicks (0.10% CTR). Ranking second on Google and barely anyone clicks. This is a near-certain title/description mismatch with searcher intent, or the title reads as irrelevant to the broader "diffuser" queries triggering it.
-- **Fix:** Update meta title and description:
-  - **Title:** `Best Oil Diffuser for Relaxation NZ — Aromatherapy Guide`
-  - **Description:** `Create a calming atmosphere at home with the right essential oil diffuser. Shop NZ-made aromatherapy oils & electric diffusers. Fast NZ shipping.`
-- **Why now:** Position 2 is prime real estate. A 0.10% CTR at rank 2 means something is actively repelling clicks — fixing this this week costs 15 minutes and could recover significant traffic immediately.
+- **Problem:** `https://www.ahurucandles.co.nz/blogs/guide/oil-diffuser-for-gamer-relaxation` — 2,925 impressions over 90 days at position 2.0 (near the top of page 1) with only 3 clicks and 0.10% CTR. Ranking second for what should be a high-intent query with virtually no CTR means the title/description is completely mismatched to what searchers want to click.
+- **Fix:** Update the meta title and description:
+  - **New title:** `Best Oil Diffuser for Gamers — Relax & Focus NZ`
+  - **New description:** `Oil diffusers for gamers who want to stay calm and focused. Shop aromatherapy diffusers with lavender, peppermint & focus blends. NZ-made, fast delivery.`
+- **Why now:** Ranking second on page 1 and getting 0.10% CTR is an extraordinary waste of a strong ranking. This is a quick copy fix with meaningful upside.
 
 ---
 
 ## 🟡 Quick Wins — Positions 5–15
 
 | Query | Position | Impressions | Recommended Action |
-|-------|----------|-------------|--------------------|
-| oils for diffuser | 5.9 | 2,249 | Add "oils for diffuser" as an exact-match H2 subheading within `/blogs/guide/best-essential-oils-for-diffusers-guide` and ensure the intro paragraph answers "which oils work best in a diffuser" directly in the first 100 words |
-| essential oil diffuser | 7.1 | 1,903 | Add a clear product CTA block within `/blogs/guide/best-essential-oils-for-diffusers-guide` linking directly to `/collections/essential-oil-diffuser-nz` — the blog ranks but the collection page is invisible; internal linking will pass authority down |
-| best essential oil for diffuser | 9.3 | 1,380 | This query is one position away from page 1. Add a dedicated FAQ question "What is the best essential oil for a diffuser?" to `/blogs/guide/best-essential-oils-for-diffusers-guide` with a 60-word answer using the exact phrase |
-| fidget ring | 5.3 | 923 | `/collections/fidget-rings-nz` ranks here — strengthen the collection page by adding 3–4 sentences of unique copy above the product grid answering "what is a fidget ring and how does it help anxiety?" using the exact phrase "fidget ring" twice |
-| best oils for diffuser | 7.3 | 843 | Ensure `/blogs/guide/best-essential-oils-for-diffusers-guide` includes a clearly labelled "Best Oils for Your Diffuser" section (H2 or H3) with a bulleted shortlist — this exact phrase has strong click intent and a scannable list will improve dwell time and clicks |
+|-------|----------|-------------|-------------------|
+| oils for diffuser | 5.9 | 2,249 | Add an H2 section titled "Which Oils Are Best for Your Diffuser?" to `/blogs/guide/best-essential-oils-for-diffusers-guide` with a direct link to `/collections/essential-oils-for-diffuser`. This exact phrase intent is informational-to-commercial — bridging it with a shop CTA will capture the click. |
+| essential oil diffuser | 7.1 | 1,903 | The page ranking here is the guide, not the collection. Add a clear "Shop Essential Oil Diffusers →" button linking to `/collections/essential-oil-diffuser-nz` near the top of the guide page, above the fold. This turns an informational visit into a transactional one. |
+| best essential oil for diffuser | 9.3 | 1,380 | This query is sitting at position 9.3 — one strong internal link push could move it to page 1. Add a contextual link to `/blogs/guide/best-essential-oils-for-diffusers-guide` from `/blogs/guide/best-essential-oil-diffuser-nz` (which already ranks at position 13.9 for related queries) using anchor text "best essential oil for diffuser NZ". |
+| fidget ring | 5.3 | 923 | `/collections/fidget-rings-nz` is ranking at position 4.9 for this query with a strong 6.89% CTR — it is close to the top 3. Add 3–5 new product reviews to this collection page via Judge.me (all visible reviews are 2022–2023 — fresh 2026 reviews will boost rich snippet stars and CTR). |
+| best oils for diffuser | 7.3 | 843 | Add a dedicated FAQ section at the bottom of `/blogs/guide/best-essential-oils-for-diffusers-guide` with the question "What are the best oils to put in a diffuser?" answered in 60 words or fewer. This targets the featured snippet for this query cluster and positions 7–10 in one edit. |
 
 ---
 
@@ -62,95 +60,106 @@ Impressions are rising broadly across diffuser, candle, and aromatherapy content
 
 **`https://www.ahurucandles.co.nz/blogs/guide/best-essential-oils-for-diffusers-guide`**
 - Current CTR: 0.34% from 198,496 impressions
-- Suggested title: `Best Essential Oils for Diffusers (NZ Guide 2026)`
-- Suggested description: `Discover the best essential oils to use in your diffuser — calming lavender, uplifting citrus & more. NZ-made blends, expert tips & free shipping over $75.`
-
----
-
-**`https://www.ahurucandles.co.nz/products/meri-kirihimete-christmas-card`**
-- Current CTR: 0.05% from 55,623 impressions
-- Suggested title: `Meri Kirihimete Card — NZ Christmas Gifts | Āhuru`
-- Suggested description: `Send a Meri Kirihimete card with any Āhuru wellness gift. NZ-made candles, diffusers & fidget rings — the perfect Christmas gift, free shipping over $75.`
+- Suggested title: `Best Essential Oils for Diffusers — Complete NZ Guide`
+- Suggested description: `Discover the best essential oils to use in your diffuser — lavender, eucalyptus, peppermint & more. Pure NZ essential oils. Shop online with fast NZ delivery.`
 
 ---
 
 **`https://www.ahurucandles.co.nz/blogs/guide/scented-tea-light-candles`**
 - Current CTR: 0.06% from 8,860 impressions
-- Suggested title: `Scented Tea Light Candles NZ — Pure Essential Oil Blends`
-- Suggested description: `Shop NZ-made scented tea light candles with pure essential oils — no synthetic fragrance. Lavender, cedarwood, lemongrass & more. Free shipping over $75.`
+- Suggested title: `Best Scented Tea Light Candles — Pure Essential Oils NZ`
+- Suggested description: `Find the best scented tea light candles made with pure essential oils — no synthetic fragrance. Handcrafted in Auckland, NZ. Shop online and get fast NZ delivery.`
+
+---
+
+**`https://www.ahurucandles.co.nz/blogs/guide/fidget-ring`**
+- Current CTR: 0.23% from 2,588 impressions
+- Suggested title: `Fidget Rings NZ — What Are They & How Do They Help?`
+- Suggested description: `Find out how fidget rings help with anxiety, ADHD, and stress relief. Shop sterling silver fidget rings handcrafted in NZ. Free NZ shipping on orders over $75.`
+
+---
+
+**`https://www.ahurucandles.co.nz/blogs/guide/vanilla-candle`**
+- Current CTR: 0.27% from 2,585 impressions
+- Suggested title: `Vanilla Candles NZ — Pure Essential Oil Soy Candles`
+- Suggested description: `Shop warm, creamy vanilla soy candles made with pure essential oils — no synthetic fragrance. Handcrafted in Auckland. Order online with fast NZ delivery.`
 
 ---
 
 **`https://www.ahurucandles.co.nz/blogs/guide/oil-diffuser-for-gamer-relaxation`**
 - Current CTR: 0.10% from 2,925 impressions
-- Suggested title: `Best Oil Diffuser for Relaxation NZ — Aromatherapy Guide`
-- Suggested description: `Create a calming atmosphere at home with the right essential oil diffuser. Shop NZ-made aromatherapy oils & electric diffusers. Fast NZ shipping.`
-
----
-
-**`https://www.ahurucandles.co.nz/blogs/essential-oil/discover-the-best-essential-oil-nz`**
-- Current CTR: 0.34% from 3,823 impressions
-- Suggested title: `Best Essential Oils NZ — Pure Aromatherapy Oils | Āhuru`
-- Suggested description: `Discover NZ's best pure essential oils for diffusers, massage & wellbeing. No synthetic fragrance — just pure botanicals. Shop online with free shipping over $75.`
+- Suggested title: `Best Oil Diffuser for Gamers — Relax & Focus NZ`
+- Suggested description: `Oil diffusers for gamers who want to stay calm and focused. Shop aromatherapy diffusers with lavender, peppermint & focus blends. NZ-made, fast delivery.`
 
 ---
 
 ## ⚠️ Keyword Cannibalisation
 
-**Query:** `essential oils for diffuser` (and closely related variants: "oils for diffuser", "essential oil for diffuser", "diffuser oil", "diffuser oils", "essential oil diffuser")
-
+**Query:** `essential oils for diffuser`
 - **Competing pages:**
-  - `/blogs/guide/best-essential-oils-for-diffusers-guide` — 11,022 impressions, position 3.7 (dominant)
+  - `/blogs/guide/best-essential-oils-for-diffusers-guide` — 11,022 impressions, position 3.7 ✅ (dominant — keep)
   - `/collections/essential-oils-for-diffuser` — 45 impressions, position 1.2
   - `/blogs/guide/essential-oil-in-diffuser` — 44 impressions, position 1.0
   - `/collections/diffuser-oil-nz` — 14 impressions, position 1.1
+- **Recommendation:** The guide is the clear winner and should remain the target page. Add a canonical tag (`rel="canonical"`) pointing to the guide on `/blogs/guide/essential-oil-in-diffuser`. Differentiate `/collections/essential-oils-for-diffuser` by rewriting its page title to focus on the transactional intent: "Shop Essential Oils for Diffusers — NZ" rather than the informational guide angle. This stops Google from splitting signals across four pages.
+
+---
+
+**Query:** `essential oil diffuser`
+- **Competing pages:**
+  - `/blogs/guide/best-essential-oils-for-diffusers-guide` — 1,638 impressions, position 5.2 ✅ (dominant — but wrong page type for this query)
+  - `/collections/aromatherapy-diffuser-nz` — 73 impressions, position 28.7
+  - `/blogs/guide/oil-diffuser-for-parent-relaxation` — 71 impressions, position 1.1
+  - `/collections/essential-oil-diffuser-nz` — 64 impressions, position 44.1
+  - `/blogs/guide/best-essential-oil-diffuser-nz` — 41 impressions, position 40.1
+  - `/collections/electric-diffuser-nz` — 36 impressions, position 45.1
+  - `/blogs/essential-oil/discover-the-best-essential-oil-nz` — 15 impressions, position 1.0
+- **Recommendation:** "Essential oil diffuser" is a transactional query — searchers want to buy a diffuser, not read a guide. The guide is winning impressions by default because the collection pages are weak. Strengthen `/collections/essential-oil-diffuser-nz` by adding 150–200 words of on-page copy above the product grid that includes the phrase "essential oil diffuser" and links back to the guide for further reading. Consolidate `/collections/aromatherapy-diffuser-nz` and `/collections/electric-diffuser-nz` with 301 redirects to `/collections/essential-oil-diffuser-nz` if they are thin pages — this concentrates link equity on one collection.
+
+---
+
+**Query:** `essential oil candles`
+- **Competing pages:**
+  - `/blogs/news/what-do-essential-oil-candles-smell-like` — 978 impressions, position 1.0 ✅ (dominant)
+  - `/` — 175 impressions, position 2.6
+  - `/blogs/guide/essential-oil-candles` — 126 impressions, position 13.5
+  - `/collections/scented-candles-nz` — 53 impressions, position 1.1
+  - `/pages/essential-oil-candles-nz` — 52 impressions, position 26.5
+  - `/collections/aromatherapy-candles-nz` — 32 impressions, position 1.2
+  - `/pages/essential-oil-candles-nz-1` — 31 impressions, position 62.5
+- **Recommendation:** Seven pages competing for one query is severe cannibalisation. Immediate action: 301 redirect `/pages/essential-oil-candles-nz-1` → `/pages/essential-oil-candles-nz`, then 301 redirect `/pages/essential-oil-candles-nz` → `/collections/scented-candles-nz`. Add a canonical on `/blogs/guide/essential-oil-candles` pointing to `/blogs/news/what-do-essential-oil-candles-smell-like` (the dominant page). This consolidates signals onto two pages: the blog post for informational intent and the collection for transactional intent. Note: candle content is currently off-peak (March) — complete the redirects now so the consolidated authority builds before October.
+
+---
+
+**Query:** `diffuser oil` / `diffuser oils`
+- **Competing pages (diffuser oil):**
+  - `/blogs/guide/best-essential-oils-for-diffusers-guide` — 1,185 impressions, position 6.5 ✅
+  - `/collections/essential-oils-for-diffuser` — 56 impressions, position 1.0
+  - `/collections/diffuser-oil-nz` — 48 impressions, position 28.7
+  - `/collections/essential-oil-diffuser-nz` — 39 impressions, position 30.2
+  - `/blogs/diffuser/best-diffuser-oils-nz` — 38 impressions, position 86.6
   - `/blogs/guide/diffuser-oil` — 35 impressions, position 76.5
-  - `/blogs/diffuser/best-diffuser-oils-nz` — 29 impressions, position 57.0
-  - `/blogs/essential-oil/discover-the-best-essential-oil-nz` — 13–22 impressions across queries
-- **Recommendation:** The blog guide is correctly dominant — do not touch its rankings. The problem is the fragmented supporting pages. Take these two steps: (1) Add explicit internal links from `/blogs/guide/best-essential-oils-for-diffusers-guide` to `/collections/essential-oils-for-diffuser` and `/collections/diffuser-oil-nz` using anchor text like "shop diffuser oils" — this channels the blog's authority into the commercial collection pages rather than letting them compete. (2) Review `/blogs/guide/essential-oil-in-diffuser` and `/blogs/guide/diffuser-oil` — if either is thin content (under 500 words), add a canonical tag pointing to the main guide, or consolidate the content into the guide and redirect. Do not delete `/collections/essential-oils-for-diffuser` or `/collections/diffuser-oil-nz` — these are commercial pages that need the traffic, but they need to be differentiated as "shop" pages, not informational ones.
+  - `/blogs/essential-oil/discover-the-best-essential-oil-nz` — 19 impressions, position 1.1
+- **Recommendation:** The guide dominates impressions but `/blogs/guide/diffuser-oil` and `/blogs/diffuser/best-diffuser-oils-nz` are dead weight at positions 76–86. 301 redirect both blog posts to `/blogs/guide/best-essential-oils-for-diffusers-guide`. Consolidate `/collections/diffuser-oil-nz` → `/collections/essential-oils-for-diffuser` with a 301 if the former is a thin collection page.
 
 ---
 
-**Query:** `essential oil candles` — 1,447 total impressions, 7 competing pages, 0 combined clicks
-
+**Query:** `fidget ring`
 - **Competing pages:**
-  - `/blogs/news/what-do-essential-oil-candles-smell-like` — 978 impressions, position 1.0, 0 clicks
-  - `/` (homepage) — 175 impressions, position 2.6, 1 click
-  - `/blogs/guide/essential-oil-candles` — 126 impressions, position 13.5, 0 clicks
-  - `/collections/scented-candles-nz` — 53 impressions, position 1.1, 0 clicks
-  - `/pages/essential-oil-candles-nz` — 52 impressions, position 26.5, 0 clicks
-  - `/collections/aromatherapy-candles-nz` — 32 impressions, position 1.2, 0 clicks
-  - `/pages/essential-oil-candles-nz-1` — 31 impressions, position 62.5, 0 clicks
-- **Recommendation:** `/pages/essential-oil-candles-nz-1` (position 62.5) and `/pages/essential-oil-candles-nz` (position 26.5) are almost certainly duplicate or near-duplicate pages — 301-redirect `/pages/essential-oil-candles-nz-1` into `/pages/essential-oil-candles-nz` immediately. Then add a canonical tag on `/blogs/guide/essential-oil-candles` pointing to `/collections/scented-candles-nz` as the preferred commercial destination. Note: candle content is outside the priority window (October–December) — defer deeper consolidation work to September 2026; just clean up the duplicate page redirect now.
-
----
-
-**Query:** `fidget ring` — 973 impressions, 4 competing pages
-
-- **Competing pages:**
-  - `/collections/fidget-rings-nz` — 895 impressions, position 4.9, 60 clicks ✅ (correct winner)
-  - `/products/best-seller-fidget-ring-bundle` — 46 impressions, position 11.3, 0 clicks
-  - `/products/sun-anxiety-fidget-ring` — 21 impressions, position 12.1, 1 click
-  - `/blogs/fidget-ring/spinner-rings-nz-discover-the-perfect-fidget-ring-at-ahuru` — 11 impressions, position 49.3, 0 clicks
-- **Recommendation:** The collection page is winning cleanly — no action needed on cannibalisation. Add a canonical tag on the blog post (`/blogs/fidget-ring/spinner-rings-nz-discover-the-perfect-fidget-ring-at-ahuru`) pointing to `/collections/fidget-rings-nz` to tidy up the signal, and ensure both product pages link back to the collection as their primary category.
+  - `/collections/fidget-rings-nz` — 895 impressions, position 4.9 ✅ (correct — transactional intent)
+  - `/products/best-seller-fidget-ring-bundle` — 46 impressions, position 11.3
+  - `/products/sun-anxiety-fidget-ring` — 21 impressions, position 12.1
+  - `/blogs/fidget-ring/spinner-rings-nz-discover-the-perfect-fidget-ring-at-ahuru` — 11 impressions, position 49.3
+- **Recommendation:** Low-level cannibalisation — the collection is winning cleanly. No immediate action needed beyond ensuring the blog post at position 49 has a canonical tag pointing to `/collections/fidget-rings-nz` to consolidate any residual signals.
 
 ---
 
 ## 📉 Dropping Pages
 
-No significant drops this week. The click decline of 16.1% appears to be a site-wide CTR issue rather than any single page losing rankings — impressions are up 5.5%, suggesting visibility is healthy but titles and descriptions are underperforming. Monitor next week to confirm no single page is collapsing.
+No significant drops this week. All week-on-week data in the provided dataset shows upward movement. The overall click drop (−16.1%) appears to be a CTR issue distributed across the site rather than any single page losing impressions.
 
 ---
 
 ## 📈 Rising Pages
 
-- **`https://www.ahurucandles.co.nz/blogs/guide/essential-oil-how-to-use`** — up 360% (15 → 69 impressions)
-  - **Action:** Add internal links to this page from `/blogs/guide/best-essential-oils-for-diffusers-guide` using anchor text "how to use essential oils in a diffuser" — capture this momentum and pass authority while the page is gaining traction.
-
-- **`https://www.ahurucandles.co.nz/collections/soy-candle-nz`** — up 236% (88 → 296 impressions)
-  - **Action:** It is March — candle content is outside peak season, but this surge is worth noting. Add 2–3 internal links to this collection from rising blog posts (`/blogs/guide/best-winter-candles` is also up 108%) using anchor text "soy candles NZ." Do not invest heavy content work here until September.
-
-- **`https://www.ahurucandles.co.nz/pages/woodwick-candles-nz`** — up 114.9% (121 → 260 impressions)
-  - **Action:** Check whether this page has a compelling meta description — if it is blank or auto-generated, update it now while impressions are climbing. Suggested title: `Woodwick Candles NZ — Soy Wax, Pure Essential Oils | Āhuru`. Add an internal link to this page from `/collections/soy-candle-nz`.
-
-- **`https://www.ahurucandles.co.nz/blogs/diffuser/the-ultimate-guide-to-choosing-the-best-diffuser-nz`** — up 129.4% (34
+- **`https://www.ahurucandles.co.nz/blogs/guide/essential-oil-how-to-use`** — up 360% (15 → 69 impress
