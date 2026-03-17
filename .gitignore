@@ -1,0 +1,18 @@
+# Credentials — NEVER commit these
+credentials/
+*.json
+!reports/*.md
+
+# Raw GSC data — large files, don't need version control
+data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+
+# OS
+.DS_Store
