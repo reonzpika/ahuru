@@ -183,7 +183,7 @@ def wrap_html(body_html, report_date, summary):
 
     <!-- Header -->
     <div style="background:#1e3a5f;padding:28px 32px;">
-      <p style="margin:0;color:#93c5fd;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Weekly SEO Report</p>
+      <p style="margin:0;color:#93c5fd;font-size:12px;text-transform:uppercase;letter-spacing:1px;">{summary.get('_report_type', 'weekly').capitalize()} SEO Report</p>
       <h1 style="margin:4px 0 0;color:#ffffff;font-size:22px;">Āhuru Candles</h1>
       <p style="margin:6px 0 0;color:#93c5fd;font-size:14px;">{report_date}</p>
     </div>
@@ -250,7 +250,12 @@ def send_report(report_text, summary):
     plain_text = re.sub(r"[#*`]", "", report_text)
     plain_text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", plain_text)
 
-    subject = f"Āhuru SEO Report — {report_date}"
+    report_type = summary.get("_report_type", "weekly")
+    report_month = summary.get("_report_month", "")
+    if report_type == "monthly":
+        subject = f"Āhuru SEO Monthly Report — {report_month}"
+    else:
+        subject = f"Āhuru SEO Weekly Report — {report_date}"
 
     payload = {
         "from": FROM_ADDRESS,
