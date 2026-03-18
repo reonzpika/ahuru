@@ -193,8 +193,8 @@ def _make_task(
     priority: int,
     report_date: str,
     *,
-    previous_seo_title: str = "",
-    previous_seo_description: str = "",
+    previous_seo_title: str | None = None,
+    previous_seo_description: str | None = None,
     proposed_seo_title: str = "",
     proposed_seo_description: str = "",
     impressions_at_creation: int = 0,
@@ -202,7 +202,11 @@ def _make_task(
     position_at_creation: float = 0.0,
     notes: str = "",
 ) -> dict:
-    """Build one task dict with full schema. report_date is the pipeline run date."""
+    """
+    Build one task dict with full schema. report_date is the pipeline run date.
+    previous_seo_title / previous_seo_description are None (unknown) at creation;
+    Phase 3 (apply_changes.py) will fetch live values from Shopify before writing.
+    """
     created = report_date
     exp = (date.fromisoformat(created) + timedelta(days=EXPIRY_DAYS)).isoformat()
     return {
@@ -219,8 +223,8 @@ def _make_task(
         "approved_date": None,
         "applied_date": None,
         "dismissed_date": None,
-        "previous_seo_title": previous_seo_title or "",
-        "previous_seo_description": previous_seo_description or "",
+        "previous_seo_title": previous_seo_title,
+        "previous_seo_description": previous_seo_description,
         "proposed_seo_title": proposed_seo_title or "",
         "proposed_seo_description": proposed_seo_description or "",
         "impressions_at_creation": impressions_at_creation,
@@ -276,6 +280,7 @@ def generate_changes(
 
     # ── Step 4 & 5: Build new tasks ──────────────────────────────────────────
     new_tasks = []
+    seen_this_run: set[str] = set()  # deduplicates within this run
     skipped_active = 0
     skipped_no_copy = 0
     skipped_no_page = 0
@@ -295,7 +300,7 @@ def generate_changes(
             print(f"Warning: Could not derive handle from ctr_opportunity: {page}")
             continue
         task_id = f"meta_update__{handle}"
-        if task_id in active_index:
+        if task_id in active_index or task_id in seen_this_run:
             skipped_active += 1
             continue
         copy_data = ctr_copy.get(handle)
@@ -320,8 +325,6 @@ def generate_changes(
             auto_apply=True,
             priority=0,  # assigned later
             report_date=report_date,
-            previous_seo_title="",
-            previous_seo_description="",
             proposed_seo_title=copy_data["title"],
             proposed_seo_description=copy_data["description"],
             impressions_at_creation=item.get("impressions", 0),
@@ -332,6 +335,7 @@ def generate_changes(
         # Normalise shopify_url if we only had path
         if not task["shopify_url"].startswith("http"):
             task["shopify_url"] = BASE_URL + ("/" + page.lstrip("/") if page.startswith("/") else f"/{resource}s/{handle}")
+        seen_this_run.add(task_id)
         new_tasks.append(task)
 
     # content_update from quick_wins (handle from page_query_90d)
@@ -355,7 +359,7 @@ def generate_changes(
             skipped_no_page += 1
             continue
         task_id = f"content_update__{handle}"
-        if task_id in active_index:
+        if task_id in active_index or task_id in seen_this_run:
             skipped_active += 1
             continue
         position = item.get("avg_position") or 0
@@ -377,6 +381,7 @@ def generate_changes(
             position_at_creation=position,
             notes=notes,
         )
+        seen_this_run.add(task_id)
         new_tasks.append(task)
 
     # cannibalisation: always type canonical
@@ -397,7 +402,7 @@ def generate_changes(
         if not handle:
             continue
         task_id = f"canonical__{handle}"
-        if task_id in active_index:
+        if task_id in active_index or task_id in seen_this_run:
             skipped_active += 1
             continue
         query = item.get("query") or ""
@@ -418,6 +423,7 @@ def generate_changes(
             impressions_at_creation=dominant.get("impressions", 0),
             notes=notes,
         )
+        seen_this_run.add(task_id)
         new_tasks.append(task)
 
     # ── Step 6: Assign priority ───────────────────────────────────────────────
