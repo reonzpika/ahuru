@@ -14,6 +14,7 @@ GitHub Actions: called by .github/workflows/weekly_report.yml
 import json
 import os
 import sys
+import traceback
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
@@ -75,6 +76,31 @@ def main():
     print("-" * 40)
     report_path = save_report(report_text)
 
+    # ── Step 4b: Generate change manifest ────────────────────────────
+    print("\nSTEP 4b: Generating change manifest")
+    print("-" * 40)
+    manifest_path = None
+    new_task_count = 0
+    report_date = start.strftime("%Y-%m-%d")
+    page_query_90d = raw_data.get("page_query_90d", [])
+    try:
+        from generate_changes import generate_changes
+        new_task_count = generate_changes(
+            analysis, report_text,
+            page_query_90d=page_query_90d,
+            report_date=report_date,
+        )
+        if new_task_count > 0:
+            manifest_path = os.path.join(
+                os.path.dirname(__file__), "..", "pending", f"{date_str}-changes.json"
+            )
+            print(f"  {new_task_count} new tasks written to seo_tasks.json")
+        else:
+            print("  No new tasks this week (all already tracked or no copy found)")
+    except Exception as e:
+        print(f"Warning: generate_changes failed: {e} — continuing")
+        traceback.print_exc()
+
     # ── Step 5: Email ────────────────────────────────────────────────
     print("\nSTEP 5: Sending email via Resend")
     print("-" * 40)
@@ -87,6 +113,12 @@ def main():
             print(f"Warning: Email failed (report still saved): {e}")
     else:
         print("RESEND_API_KEY not set — skipping email")
+    if manifest_path and new_task_count > 0:
+        try:
+            from email_report import send_approval_email
+            send_approval_email(manifest_path, new_task_count)
+        except Exception as e:
+            print(f"Warning: Approval email failed: {e} — continuing")
 
     # ── Done ─────────────────────────────────────────────────────────
     elapsed = (datetime.utcnow() - start).total_seconds()
@@ -94,6 +126,8 @@ def main():
     print(f"Pipeline complete in {elapsed:.1f}s")
     print(f"  Report: {report_path}")
     print(f"  Latest: reports/latest.md")
+    if manifest_path:
+        print(f"  Manifest: {manifest_path}")
     print(f"{'='*60}")
 
 

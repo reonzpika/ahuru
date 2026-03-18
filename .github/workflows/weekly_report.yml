@@ -44,6 +44,6 @@ jobs:
         run: |
           git config --global user.name  "ahuru-seo-bot"
           git config --global user.email "bot@ahurucandles.co.nz"
-          git add reports/
+          git add reports/ seo_tasks.json pending/
           git diff --staged --quiet || git commit -m "Weekly SEO report $(date -u +%Y-%m-%d)"
           git push
