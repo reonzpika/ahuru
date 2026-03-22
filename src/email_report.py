@@ -286,7 +286,7 @@ def send_report(report_text, summary):
         raise RuntimeError(f"Resend API error {response.status_code}: {response.text}")
 
 
-# ── Approval email (pending changes manifest) ───────────────────────────────────
+# ── Approval email (pending changes manifest) ─────────────────────────────────
 
 def _load_manifest(manifest_path):
     """Read and parse manifest JSON. Raises RuntimeError if file missing or invalid."""
@@ -471,6 +471,174 @@ def send_approval_email(manifest_path, new_task_count):
         print(f"✓ Approval email sent — ID: {response.json().get('id', 'unknown')}")
         return response.json()
     raise RuntimeError(f"Resend API error {response.status_code}: {response.text}")
+
+
+# ── Confirmation email (applied changes) ──────────────────────────────────────
+
+def _confirmation_email_html(audit_records: list, report_date: str, log_filename: str) -> str:
+    """Builds HTML body for the applied changes confirmation email."""
+
+    def _result_style(result):
+        if result == "error":
+            return "background:#fee2e2;color:#991b1b;"
+        if result == "skipped_mismatch":
+            return "background:#fef9c3;color:#854d0e;"
+        if result in ("dry_run", "dry_run_rollback"):
+            return "background:#f0f9ff;color:#0369a1;"
+        if result == "rolled_back":
+            return "background:#f5f3ff;color:#6d28d9;"
+        return "background:#dcfce7;color:#166534;"
+
+    rows_html = ""
+    for r in audit_records:
+        prev_title = _escape(r.get("previous_seo_title") or "—")
+        new_title = _escape(r.get("new_seo_title") or "—")
+        result = r.get("result", "unknown")
+        style = _result_style(result)
+        rows_html += f"""
+        <tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#334155;font-family:monospace;">{_escape(r.get("handle", ""))}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#64748b;">{_escape(r.get("resource", ""))}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#64748b;">{prev_title}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#1e3a5f;font-weight:500;">{new_title}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;{style}border-radius:4px;white-space:nowrap;">{_escape(result)}</td>
+        </tr>"""
+
+    log_url = f"https://github.com/reonzpika/ahuru/blob/main/logs/{_escape(log_filename)}"
+
+    counts = {
+        "applied": sum(1 for r in audit_records if r.get("result") == "applied"),
+        "error": sum(1 for r in audit_records if r.get("result") == "error"),
+        "skipped_mismatch": sum(1 for r in audit_records if r.get("result") == "skipped_mismatch"),
+        "dry_run": sum(1 for r in audit_records if r.get("result") in ("dry_run", "dry_run_rollback")),
+        "rolled_back": sum(1 for r in audit_records if r.get("result") == "rolled_back"),
+    }
+
+    summary_items = []
+    if counts["applied"]:
+        summary_items.append(f'<span style="color:#166534;font-weight:600;">{counts["applied"]} applied</span>')
+    if counts["dry_run"]:
+        summary_items.append(f'<span style="color:#0369a1;font-weight:600;">{counts["dry_run"]} dry run</span>')
+    if counts["rolled_back"]:
+        summary_items.append(f'<span style="color:#6d28d9;font-weight:600;">{counts["rolled_back"]} rolled back</span>')
+    if counts["skipped_mismatch"]:
+        summary_items.append(f'<span style="color:#854d0e;font-weight:600;">{counts["skipped_mismatch"]} skipped (mismatch)</span>')
+    if counts["error"]:
+        summary_items.append(f'<span style="color:#991b1b;font-weight:600;">{counts["error"]} error(s)</span>')
+    summary_str = " &nbsp;·&nbsp; ".join(summary_items) if summary_items else "No tasks processed"
+
+    th_style = "padding:10px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;"
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Āhuru SEO Changes Applied</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a202c;">
+  <div style="max-width:680px;margin:32px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+
+    <div style="background:#1e3a5f;padding:28px 32px;">
+      <p style="margin:0;color:#93c5fd;font-size:12px;text-transform:uppercase;letter-spacing:1px;">SEO Apply</p>
+      <h1 style="margin:4px 0 0;color:#ffffff;font-size:22px;">Āhuru Candles</h1>
+      <p style="margin:6px 0 0;color:#93c5fd;font-size:14px;">{report_date}</p>
+    </div>
+
+    <div style="background:#f8fafc;padding:16px 32px;border-bottom:1px solid #e2e8f0;">
+      <p style="margin:0;font-size:14px;">{summary_str}</p>
+    </div>
+
+    <div style="padding:28px 32px;">
+      <table style="width:100%;border-collapse:collapse;margin:0;font-size:14px;">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th style="{th_style}">Handle</th>
+            <th style="{th_style}">Type</th>
+            <th style="{th_style}">Previous Title</th>
+            <th style="{th_style}">New Title</th>
+            <th style="{th_style}">Result</th>
+          </tr>
+        </thead>
+        <tbody>{rows_html}</tbody>
+      </table>
+
+      <p style="margin:24px 0 0;font-size:13px;color:#64748b;">
+        Audit log: <a href="{log_url}" style="color:#1e3a5f;">{_escape(log_filename)}</a>
+      </p>
+    </div>
+
+    <div style="background:#f1f5f9;padding:16px 32px;border-top:1px solid #e2e8f0;">
+      <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">
+        Generated automatically by the Āhuru SEO pipeline ·
+        <a href="https://github.com/reonzpika/ahuru" style="color:#64748b;">View repo</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>"""
+
+
+def send_confirmation_email(audit_records: list) -> None:
+    """
+    Sends a confirmation email summarising applied SEO changes.
+    Subject: Āhuru SEO Changes Applied — DD Month YYYY
+    Table: Handle, Resource, Previous Title, New Title, Result.
+    Errors and mismatches highlighted in colour.
+    Links to audit log on GitHub.
+
+    If RESEND_API_KEY is not set: prints summary to stdout and returns without error (non-fatal).
+    """
+    report_date = datetime.now(timezone.utc).strftime("%d %B %Y")
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    log_filename = f"{date_str}-applied.json"
+    subject = f"Āhuru SEO Changes Applied — {report_date}"
+
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
+        print("RESEND_API_KEY not set — confirmation email summary:")
+        for r in audit_records:
+            print(f"  {r.get('handle')} ({r.get('resource')}): {r.get('result')}")
+        return
+
+    body_html = _confirmation_email_html(audit_records, report_date, log_filename)
+
+    plain_lines = [f"Āhuru SEO Changes Applied — {report_date}", ""]
+    for r in audit_records:
+        plain_lines.append(
+            f"{r.get('handle')} ({r.get('resource')}): {r.get('result')} | "
+            f"{r.get('previous_seo_title', '—')} → {r.get('new_seo_title', '—')}"
+        )
+    plain_lines.append(f"\nAudit log: https://github.com/reonzpika/ahuru/blob/main/logs/{log_filename}")
+
+    payload = {
+        "from": FROM_ADDRESS,
+        "to": TO_ADDRESSES,
+        "subject": subject,
+        "html": body_html,
+        "text": "\n".join(plain_lines),
+    }
+
+    print(f"  Sending to: {', '.join(TO_ADDRESSES)}")
+    print(f"  Subject: {subject}")
+
+    try:
+        response = _requests.post(
+            RESEND_API_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=30,
+        )
+        if response.status_code in (200, 201):
+            print(f"  ✓ Confirmation email sent — ID: {response.json().get('id', 'unknown')}")
+        else:
+            print(f"  Warning: Resend API error {response.status_code}: {response.text}")
+    except Exception as e:
+        print(f"  Warning: Email send failed: {e}")
 
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
