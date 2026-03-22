@@ -161,8 +161,9 @@ def apply_all(dry_run: bool = False) -> list:
             audit["previous_seo_description"] = live["seo_description"]
 
             # Mismatch check — only if previous_seo_title was already recorded
+            # (empty string from the task file means "no baseline", same as null)
             recorded_prev = task.get("previous_seo_title")
-            if recorded_prev is not None and live["seo_title"] != recorded_prev:
+            if recorded_prev not in (None, "") and live["seo_title"] != recorded_prev:
                 print(
                     f"  Warning: Live title does not match recorded previous title.\n"
                     f"    Recorded: {recorded_prev!r}\n"
