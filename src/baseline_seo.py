@@ -53,19 +53,20 @@ def get_live_seo_pair(
     if not shopify_env_ready():
         if not _MISSING_SHOPIFY_LOGGED:
             print(
-                "Note: SHOPIFY_CLIENT_ID / SHOPIFY_CLIENT_SECRET / SHOPIFY_DOMAIN not all set — "
+                "Note: SHOPIFY_CLIENT_ID / SHOPIFY_CLIENT_SECRET / SHOPIFY_DOMAIN not all set: "
                 "skipping baseline SEO fetch"
             )
             _MISSING_SHOPIFY_LOGGED = True
         return None
 
-    if not handle or resource not in ("product", "article"):
+    if not handle or resource not in ("product", "article", "collection", "page"):
         key = (str(resource), str(handle))
         if key not in _UNSUPPORTED_RESOURCE_LOGGED:
-            tid = f"{task_id!r} — " if task_id else ""
+            tid = f"{task_id!r}: " if task_id else ""
             print(
                 f"Warning: Baseline SEO not fetched for {tid}"
-                f"resource {resource!r} is not supported (expected product or article)"
+                f"resource {resource!r} is not supported "
+                f"(expected product, article, collection, or page)"
             )
             _UNSUPPORTED_RESOURCE_LOGGED.add(key)
         return None
@@ -92,7 +93,7 @@ def get_live_seo_pair(
 
 def fetch_previous_seo_for_task(task: dict, cache: dict[tuple[str, str, str], tuple[str, str]]) -> None:
     """
-    Mutates task in place. Only meta_update; only product/article (get_seo support).
+    Mutates task in place. Only meta_update; uses get_seo for supported resources.
     Caches (resource, handle) -> (seo_title, seo_description) for one run.
     """
     if task.get("type") != "meta_update":

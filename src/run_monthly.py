@@ -1,7 +1,7 @@
 """
 run_monthly.py
 Orchestrates the monthly strategic SEO report pipeline:
-  1. Fetch GSC data (8 API calls — 28d MoM + 90d YoY)
+  1. Fetch GSC data (8 API calls: 28d MoM + 90d YoY)
   2. Analyse into strategic insight buckets
   3. Generate report via Claude API
   4. Save to /reports/monthly/
@@ -14,7 +14,8 @@ GitHub Actions: called by .github/workflows/monthly_report.yml
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -25,6 +26,31 @@ from gsc_fetch_monthly import fetch_monthly_data
 from analyse_monthly import analyse_monthly
 from report_monthly import generate_monthly_report, save_monthly_report
 from email_report import send_report
+
+AUCKLAND = ZoneInfo("Pacific/Auckland")
+
+
+def _date_first_monday_auckland(year: int, month: int) -> date:
+    """Calendar date of the first Monday in year/month (Pacific/Auckland calendar)."""
+    first = date(year, month, 1)
+    offset = (7 - first.weekday()) % 7
+    if first.weekday() == 0:
+        return first
+    return first + timedelta(days=offset)
+
+
+def _skip_monthly_schedule_not_first_monday() -> bool:
+    """
+    For GITHUB_EVENT_NAME=schedule only: skip if today is not the first Monday
+    of the month in Pacific/Auckland. Guards against cron DOM/DOW OR semantics.
+    """
+    if os.environ.get("GITHUB_EVENT_NAME") != "schedule":
+        return False
+    now = datetime.now(AUCKLAND)
+    if now.weekday() != 0:
+        return True
+    first_mon = _date_first_monday_auckland(now.year, now.month)
+    return now.date() != first_mon
 
 
 def build_monthly_summary(analysis):
@@ -52,6 +78,13 @@ def build_monthly_summary(analysis):
 
 
 def main():
+    if _skip_monthly_schedule_not_first_monday():
+        print(
+            "Skipping monthly pipeline: scheduled run is not the first Monday "
+            "of the month (Pacific/Auckland)."
+        )
+        return
+
     start = datetime.utcnow()
     print(f"{'='*60}")
     print(f"Āhuru Monthly SEO Report Pipeline")
@@ -115,7 +148,7 @@ def main():
         except Exception as e:
             print(f"Warning: Email failed (report still saved): {e}")
     else:
-        print("RESEND_API_KEY not set — skipping email")
+        print("RESEND_API_KEY not set: skipping email")
 
     # ── Done ─────────────────────────────────────────────────────────
     elapsed = (datetime.utcnow() - start).total_seconds()

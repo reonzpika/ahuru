@@ -336,16 +336,210 @@ def update_article_seo(article_id: str, seo_title: str, seo_description: str) ->
     return result.get("article", {})
 
 
+# ── Collection SEO ────────────────────────────────────────────────────────────
+
+
+def get_collection_seo(handle: str) -> dict:
+    """
+    Fetches current SEO fields for a collection by handle.
+    Returns {"id", "seo_title", "seo_description"}.
+    """
+    query = """
+    query GetCollectionSEO($handle: String!) {
+      collectionByHandle(handle: $handle) {
+        id
+        seo {
+          title
+          description
+        }
+      }
+    }
+    """
+    data = _graphql(query, {"handle": handle})
+    node = data.get("collectionByHandle")
+    if not node:
+        raise RuntimeError(f"Collection not found for handle: {handle!r}")
+    seo = node.get("seo") or {}
+    return {
+        "id": node["id"],
+        "seo_title": (seo.get("title") or "") if seo else "",
+        "seo_description": (seo.get("description") or "") if seo else "",
+    }
+
+
+def update_collection_seo(collection_id: str, seo_title: str, seo_description: str) -> dict:
+    mutation = """
+    mutation UpdateCollectionSEO($input: CollectionInput!) {
+      collectionUpdate(input: $input) {
+        collection {
+          id
+          seo {
+            title
+            description
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    data = _graphql(mutation, {
+        "input": {
+            "id": collection_id,
+            "seo": {"title": seo_title, "description": seo_description},
+        },
+    })
+    result = data.get("collectionUpdate", {})
+    user_errors = result.get("userErrors", [])
+    if user_errors:
+        raise RuntimeError(f"Shopify userErrors on collection update: {user_errors}")
+    return result.get("collection", {})
+
+
+# ── Page SEO ──────────────────────────────────────────────────────────────────
+# Admin Page type has no `seo` on PageUpdateInput. Listing title/description use
+# `global` metafields `title_tag` and `description_tag` (same pattern as articles).
+
+
+def _page_seo_metafield_inputs(
+    page_id: str,
+    seo_title: str,
+    seo_description: str,
+) -> list[dict]:
+    """MetafieldInput list for page SEO (global title_tag / description_tag)."""
+    query = """
+    query PageSeoMetafields($id: ID!) {
+      page(id: $id) {
+        id
+        metafields(first: 20, namespace: "global") {
+          edges {
+            node {
+              id
+              key
+              namespace
+              value
+            }
+          }
+        }
+      }
+    }
+    """
+    data = _graphql(query, {"id": page_id})
+    page = data.get("page")
+    if not page:
+        raise RuntimeError(f"Page not found for id: {page_id!r}")
+
+    edges = page.get("metafields", {}).get("edges", [])
+    by_key: dict[str, dict] = {}
+    for edge in edges:
+        node = edge.get("node") or {}
+        k = node.get("key")
+        if k in ("title_tag", "description_tag"):
+            by_key[k] = node
+
+    inputs: list[dict] = []
+    for key, new_val in (
+        ("title_tag", seo_title),
+        ("description_tag", seo_description),
+    ):
+        existing = by_key.get(key)
+        if existing and existing.get("id"):
+            inputs.append({"id": existing["id"], "value": new_val})
+        else:
+            inputs.append({
+                "namespace": "global",
+                "key": key,
+                "value": new_val,
+                "type": "single_line_text_field",
+            })
+    return inputs
+
+
+def get_page_seo(handle: str) -> dict:
+    """
+    Fetches SEO for an online store page by handle (global title_tag / description_tag).
+    """
+    query = """
+    query FindPageSEO($q: String!) {
+      pages(first: 5, query: $q) {
+        edges {
+          node {
+            id
+            handle
+            metafields(first: 20, namespace: "global") {
+              edges {
+                node {
+                  key
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    data = _graphql(query, {"q": f"handle:{handle}"})
+    edges = data.get("pages", {}).get("edges", [])
+    for edge in edges:
+        node = edge.get("node") or {}
+        if node.get("handle") != handle:
+            continue
+        mf_edges = (node.get("metafields") or {}).get("edges", [])
+        seo_title, seo_description = _article_metafields_to_seo(mf_edges)
+        return {
+            "id": node["id"],
+            "seo_title": seo_title,
+            "seo_description": seo_description,
+        }
+    raise RuntimeError(f"Page not found for handle: {handle!r}")
+
+
+def update_page_seo(page_id: str, seo_title: str, seo_description: str) -> dict:
+    metafields = _page_seo_metafield_inputs(page_id, seo_title, seo_description)
+    mutation = """
+    mutation UpdatePageSEO($id: ID!, $page: PageUpdateInput!) {
+      pageUpdate(id: $id, page: $page) {
+        page {
+          id
+          handle
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    """
+    data = _graphql(mutation, {
+        "id": page_id,
+        "page": {"metafields": metafields},
+    })
+    result = data.get("pageUpdate", {})
+    user_errors = result.get("userErrors", [])
+    if user_errors:
+        raise RuntimeError(f"Shopify userErrors on page update: {user_errors}")
+    return result.get("page", {})
+
+
 # ── Routers ───────────────────────────────────────────────────────────────────
 
 def get_seo(resource: str, handle: str, blog_handle: str | None = None) -> dict:
-    """Routes to get_product_seo or get_article_seo based on resource type."""
+    """Routes by resource type to the matching Shopify SEO reader."""
     if resource == "product":
         return get_product_seo(handle)
-    elif resource == "article":
+    if resource == "article":
         return get_article_seo(handle, blog_handle=blog_handle)
-    else:
-        raise ValueError(f"Unknown resource type: {resource!r}. Expected 'product' or 'article'.")
+    if resource == "collection":
+        return get_collection_seo(handle)
+    if resource == "page":
+        return get_page_seo(handle)
+    raise ValueError(
+        f"Unknown resource type: {resource!r}. "
+        f"Expected 'product', 'article', 'collection', or 'page'."
+    )
 
 
 def update_seo(
@@ -354,13 +548,19 @@ def update_seo(
     seo_title: str,
     seo_description: str,
 ) -> dict:
-    """Routes to update_product_seo or update_article_seo based on resource type."""
+    """Routes by resource type to the matching Shopify SEO writer."""
     if resource == "product":
         return update_product_seo(resource_id, seo_title, seo_description)
-    elif resource == "article":
+    if resource == "article":
         return update_article_seo(resource_id, seo_title, seo_description)
-    else:
-        raise ValueError(f"Unknown resource type: {resource!r}. Expected 'product' or 'article'.")
+    if resource == "collection":
+        return update_collection_seo(resource_id, seo_title, seo_description)
+    if resource == "page":
+        return update_page_seo(resource_id, seo_title, seo_description)
+    raise ValueError(
+        f"Unknown resource type: {resource!r}. "
+        f"Expected 'product', 'article', 'collection', or 'page'."
+    )
 
 
 # ── Standalone test ───────────────────────────────────────────────────────────
@@ -391,5 +591,27 @@ if __name__ == "__main__":
         print(f"  SEO title:        {result['seo_title']!r}")
         print(f"  SEO description:  {result['seo_description']!r}")
         print("  ✓ Article lookup OK")
+    except Exception as e:
+        print(f"  ✗ Error: {e}")
+
+    print("\nCollection SEO (replace handle in script if needed):")
+    print("-" * 40)
+    try:
+        result = get_collection_seo("all")
+        print(f"  ID:               {result['id']}")
+        print(f"  SEO title:        {result['seo_title']!r}")
+        print(f"  SEO description:  {result['seo_description']!r}")
+        print("  ✓ Collection lookup OK")
+    except Exception as e:
+        print(f"  ✗ Error: {e}")
+
+    print("\nPage SEO (replace handle if needed):")
+    print("-" * 40)
+    try:
+        result = get_page_seo("contact")
+        print(f"  ID:               {result['id']}")
+        print(f"  SEO title:        {result['seo_title']!r}")
+        print(f"  SEO description:  {result['seo_description']!r}")
+        print("  ✓ Page lookup OK")
     except Exception as e:
         print(f"  ✗ Error: {e}")

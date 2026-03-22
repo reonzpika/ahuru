@@ -2,8 +2,9 @@ name: Weekly SEO Report
 
 on:
   schedule:
-    # Sunday 8am UTC = Sunday 8-9pm NZ time (UTC+12/+13)
-    - cron: "0 8 * * 0"
+    # Every Monday 08:00 Pacific/Auckland (NZST/NZDT handled by GitHub)
+    - cron: "0 8 * * 1"
+      timezone: "Pacific/Auckland"
 
   # Allow manual trigger from GitHub Actions tab
   workflow_dispatch:

@@ -2,13 +2,9 @@ name: Monthly SEO Report
 
 on:
   schedule:
-    # First Sunday of each month at 8am UTC (8-9pm NZ time)
-    # Cron cannot express "first Sunday" directly — runs every Sunday,
-    # but the script checks the date and only proceeds on the first Sunday.
-    # Alternative: run on the 1st of each month at 8am UTC if you prefer
-    # a fixed calendar date over a fixed day of week.
-    # Current: day-of-month 1-7 AND Sunday = first Sunday of month
-    - cron: "0 8 1-7 * 0"
+    # First Monday of each month, 08:00 Pacific/Auckland (DOM 1-7 + Monday; once per month)
+    - cron: "0 8 1-7 * 1"
+      timezone: "Pacific/Auckland"
 
   # Manual trigger — use this to test or re-run any month
   workflow_dispatch:

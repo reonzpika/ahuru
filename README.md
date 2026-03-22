@@ -1,256 +1,241 @@
 # Āhuru SEO Automation
 
-Automated SEO monitoring and reporting for [ahurucandles.co.nz](https://ahurucandles.co.nz).
+Automated SEO monitoring, reporting, and Shopify meta updates for [ahurucandles.co.nz](https://ahurucandles.co.nz).
 
-**Two components:**
-1. **Interactive analysis** — `mcp-gsc` + Claude Desktop/Cursor for ad-hoc queries
-2. **Automated weekly report** — GitHub Actions runs every Sunday, commits a Markdown report
+The stack pulls **Google Search Console** data, summarises it in Python, asks **Claude** to draft weekly and monthly Markdown reports, optionally **emails** stakeholders via Resend, and maintains a **task registry** (`seo_tasks.json`) that can push approved **meta updates** to Shopify.
+
+**Two ways to work with data:**
+
+1. **Interactive analysis:** [mcp-gsc](https://github.com/AminForou/mcp-gsc) in Cursor or Claude Desktop for ad-hoc GSC questions.
+2. **Automated pipelines:** GitHub Actions (and matching local scripts) for weekly reports, monthly strategic reports, and manual apply runs.
+
+```mermaid
+flowchart LR
+  subgraph weeklyFlow [Weekly pipeline]
+    GSC1[GSC API] --> Analyse[analyse.py]
+    Analyse --> Report[report.py]
+    Report --> Files1[reports/]
+    Report --> GenCh[generate_changes.py]
+    GenCh --> Tasks[seo_tasks.json]
+    GenCh --> Pending[pending/ manifests]
+    Files1 --> Email1[email_report]
+    GenCh --> Email1
+  end
+  subgraph monthlyFlow [Monthly pipeline]
+    GSC2[GSC API] --> AnalyseM[analyse_monthly.py]
+    AnalyseM --> ReportM[report_monthly.py]
+    ReportM --> Files2[reports/monthly/]
+    Files2 --> Email2[email_report]
+  end
+  subgraph applyFlow [Apply pipeline]
+    Tasks2[seo_tasks.json approved] --> Apply[apply_changes.py]
+    Apply --> Shopify[Shopify Admin API]
+    Apply --> Logs[logs/]
+    Apply --> Email3[confirmation email]
+  end
+```
 
 ---
 
-## Part 1: Interactive Analysis (mcp-gsc + Claude)
+## Automated pipelines
 
-This lets you ask Claude natural-language questions against live GSC data.
+| Pipeline | When | Run locally | Workflow | Typical git changes |
+|----------|------|-------------|----------|---------------------|
+| **Weekly report** | Every **Monday 08:00** `Pacific/Auckland`; manual | `python src/run_weekly.py` | [`weekly_report.yml`](.github/workflows/weekly_report.yml) | [`reports/`](reports/) (including `latest.md`), [`seo_tasks.json`](seo_tasks.json) |
+| **Monthly report** | First **Monday 08:00** `Pacific/Auckland` each month (cron `0 8 1-7 * 1` with that timezone); manual | `python src/run_monthly.py` | [`monthly_report.yml`](.github/workflows/monthly_report.yml) | [`reports/monthly/`](reports/monthly/) |
+| **Apply SEO to Shopify** | Manual only | `python src/apply_changes.py` (see flags below) | [`apply_changes.yml`](.github/workflows/apply_changes.yml) | [`seo_tasks.json`](seo_tasks.json), [`logs/`](logs/) |
+| **GitHub Pages (dashboard + reports)** | On push to `main`; manual | Open locally: [`dashboard.html`](dashboard.html) | [`github-pages.yml`](.github/workflows/github-pages.yml) | None (static deploy; bundles [`reports/`](reports/) and [`reports/monthly/`](reports/monthly) Markdown into the site) |
 
-### 1.1 Google Cloud Setup
+Scheduled workflows use **`timezone: Pacific/Auckland`**, so **08:00** is always Monday morning local time in New Zealand, including daylight saving changes (see [GitHub schedule syntax](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onschedule)).
 
-You need a service account that has read access to Ahuru's GSC property.
+### Weekly run details
 
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project (e.g. `ahuru-seo`)
-3. Enable the **Google Search Console API**:
-   - APIs & Services → Library → search "Search Console API" → Enable
-4. Create a service account:
-   - APIs & Services → Credentials → Create Credentials → Service Account
-   - Name: `ahuru-gsc-reader`
-   - Role: skip (leave blank) — GSC manages access separately
-   - Create and continue → Done
-5. Generate a JSON key:
-   - Click the service account → Keys tab → Add Key → Create new key → JSON
-   - Download the JSON file — this is your `service_account.json`
-6. Add the service account to GSC:
-   - Open [Google Search Console](https://search.google.com/search-console)
-   - Select the Ahuru property → Settings → Users and permissions → Add user
-   - Paste the service account email (looks like `ahuru-gsc-reader@ahuru-seo.iam.gserviceaccount.com`)
-   - Permission: **Full** (needed to fetch all data)
+Steps: fetch GSC → [`analyse.py`](src/analyse.py) → [`report.py`](src/report.py) → save under [`reports/`](reports/) → [`generate_changes.py`](src/generate_changes.py) merges new tasks into [`seo_tasks.json`](seo_tasks.json) and writes a dated manifest under [`pending/`](pending/) → optional Resend: **report email** (highlights + link to the dashboard; see [`src/email_report.py`](src/email_report.py)), then **approval summary** when new tasks exist.
 
-### 1.2 mcp-gsc Setup
+Raw GSC JSON for debugging is written to [`data/`](data/) (gitignored).
+
+### Monthly run details
+
+Steps: [`gsc_fetch_monthly.py`](src/gsc_fetch_monthly.py) (28d MoM + 90d YoY windows) → [`analyse_monthly.py`](src/analyse_monthly.py) → [`report_monthly.py`](src/report_monthly.py) → [`reports/monthly/`](reports/monthly/) → optional Resend **highlights** email (same pattern as weekly; full Markdown on the dashboard under **Monthly**).
+
+On GitHub **schedule** only, [`run_monthly.py`](src/run_monthly.py) exits immediately unless that run falls on the **first Monday** of the month in `Pacific/Auckland`, so stray cron matches in the first week of the month do not publish duplicate reports. **workflow_dispatch** and local runs are not affected.
+
+System prompts live in [`prompts/system_prompt.md`](prompts/system_prompt.md) (weekly) and [`prompts/system_prompt_monthly.md`](prompts/system_prompt_monthly.md) (monthly).
+
+### `pending/` versus `seo_tasks.json`
+
+The full backlog and task statuses live in **`seo_tasks.json`** at the repo root; that file is what Actions commits.
+
+Dated manifests `pending/YYYY-MM-DD-changes.json` list tasks produced in that run. Root [`.gitignore`](.gitignore) ignores `*.json` except where explicitly negated, so **manifest JSON files are not tracked**; only [`pending/README.md`](pending/README.md) (and `.gitkeep`) are in git. Manifests still matter for local review and for the weekly approval email content.
+
+### Approval dashboard (GitHub Pages)
+
+[`dashboard.html`](dashboard.html) is the browser UI for reviewing `seo_tasks.json` and reading **weekly and monthly** Markdown reports (tab **SEO reports**). After the [`github-pages.yml`](.github/workflows/github-pages.yml) workflow has run, the live URLs are:
+
+- `https://reonzpika.github.io/ahuru/` (same page as `index.html`)
+- `https://reonzpika.github.io/ahuru/dashboard.html`
+
+Each deploy copies **`reports/latest.md`**, dated weekly files matching `YYYY-MM-DD.md`, and **`reports/archive-index.json`** into **`/reports/`**, and copies **`reports/monthly/`** (including `latest.md`, `YYYY-MM.md`, and **`archive-index.json`**) into **`/reports/monthly/`**. On the dashboard, open **SEO reports**, choose **Weekly** or **Monthly**, then pick an archive or **Latest**.
+
+Resend emails for weekly and monthly runs send **highlights only** (first sections of the Markdown plus the KPI strip), with links to the full report on the dashboard. The full file is never attached to the email.
+
+**Privacy:** on a **public** GitHub Pages site, anything under **`/reports/`** and **`/reports/monthly/`** is **world-readable**. Approving tasks and dispatching Actions still uses a **Personal Access Token** in the browser (see dashboard copy); that token is not used to load the published report files.
+
+**One-time setup (repository admin):** **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions** (not “Deploy from a branch”). The first push to `main` after that (or **Actions → Deploy GitHub Pages → Run workflow**) publishes the site. Pushing the weekly report to `main` triggers a new Pages deploy, so `/reports/latest.md` tracks the repo after the workflow finishes. See [GitHub Pages documentation](https://docs.github.com/en/pages).
+
+---
+
+## GitHub Actions secrets
+
+Add these under **Settings → Secrets and variables → Actions** (repository secrets).
+
+| Secret | Weekly | Monthly | Apply |
+|--------|:------:|:-------:|:-----:|
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Yes | Yes | No |
+| `ANTHROPIC_API_KEY` | Yes | Yes | No |
+| `RESEND_API_KEY` | Yes (optional) | Yes (optional) | Yes (optional) |
+| `SHOPIFY_CLIENT_ID` | Yes (optional) | No | Yes |
+| `SHOPIFY_CLIENT_SECRET` | Yes (optional) | No | Yes |
+| `SHOPIFY_DOMAIN` | Yes (optional) | No | Yes |
+
+- **`GOOGLE_SERVICE_ACCOUNT_JSON`**: entire service account JSON as a single string (same as local key file contents).
+- **Shopify (weekly, optional)**: when set, new `meta_update` tasks can populate `previous_seo_title` / `previous_seo_description` from the live store during generation. If omitted, task generation still runs; those fields may stay empty until you run apply or [`src/backfill_previous_seo.py`](src/backfill_previous_seo.py).
+- **`SEO_SKIP_BASELINE_FETCH`**: set to `1`, `true`, or `yes` to skip baseline Shopify reads during task generation even when Shopify secrets exist (see [`src/baseline_seo.py`](src/baseline_seo.py)).
+
+Email sender, recipients, and the **dashboard CTA URL** (`DASHBOARD_REPORT_URL`) are configured in [`src/email_report.py`](src/email_report.py) (Resend). Apply runs can send a **confirmation** email when `RESEND_API_KEY` is set.
+
+### GSC property URL
+
+[`src/gsc_fetch.py`](src/gsc_fetch.py) sets `SITE_URL = "sc-domain:ahurucandles.co.nz"`. If you fork this for another site, change `SITE_URL` to match the property exactly (URL-prefix or `sc-domain:` form) as shown in Search Console.
+
+---
+
+## Task workflow and Shopify apply
+
+1. Each week, the report’s **CTR Opportunities** section (with the expected Markdown shape) feeds [`generate_changes.py`](src/generate_changes.py), which appends new rows to [`seo_tasks.json`](seo_tasks.json).
+2. Review tasks in the repo. Set `status` to **`approved`** for anything you want pushed live.
+3. Run **`Apply SEO Changes`** in Actions (optional **dry run** input), or locally:
+   - `python src/apply_changes.py`: apply all approved tasks.
+   - `python src/apply_changes.py --dry-run`: no Shopify writes; no status updates in `seo_tasks.json`.
+   - `python src/apply_changes.py --rollback <task_id>`: restore previous title/description for that task (`--dry-run` supported).
+
+Tasks carry an **`auto_apply`** flag for future workflow use; **today’s apply script processes every task with `status: approved`**, regardless of `auto_apply`.
+
+Statuses and behaviour are documented in the docstring at the top of [`src/apply_changes.py`](src/apply_changes.py).
+
+**Shopify resource types:** `meta_update` apply and baseline reads support **`product`**, **`article`**, **`collection`**, and **`page`** via [`src/shopify_client.py`](src/shopify_client.py). Pages use `global` metafields `title_tag` / `description_tag` (Admin API does not expose a `seo` field on `PageUpdateInput`). Ensure the app’s scopes include collection and page content access if you apply those tasks.
+
+**Backfill baseline copy:** for `meta_update` tasks that are still `pending` or `approved` but missing `previous_seo_*`, run (with Shopify env vars set):
 
 ```bash
-git clone https://github.com/AminForou/mcp-gsc.git
-cd mcp-gsc
+python src/backfill_previous_seo.py              # dry run
+python src/backfill_previous_seo.py --write      # update seo_tasks.json
+```
+
+---
+
+## Local development
+
+```bash
+git clone https://github.com/reonzpika/ahuru.git
+cd ahuru
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Place your `service_account.json` somewhere secure (e.g. `~/credentials/ahuru_gsc.json`).
+**Google auth (pick one):**
 
-### 1.3 Connect to Claude Desktop
+- Set `GOOGLE_SERVICE_ACCOUNT_JSON` to the full JSON string, or  
+- Place the key at `credentials/service_account.json` (the `credentials/` folder is gitignored).
 
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac):
+**Other env vars** (e.g. in a `.env` file; loaded via `python-dotenv`):
 
-```json
-{
-  "mcpServers": {
-    "gsc": {
-      "command": "/FULL/PATH/TO/mcp-gsc/.venv/bin/python",
-      "args": ["/FULL/PATH/TO/mcp-gsc/gsc_server.py"],
-      "env": {
-        "GSC_CREDENTIALS_PATH": "/FULL/PATH/TO/ahuru_gsc.json",
-        "GSC_SKIP_OAUTH": "true"
-      }
-    }
-  }
-}
-```
+- `ANTHROPIC_API_KEY`: required for report generation.
+- `RESEND_API_KEY`: optional; skips email when unset.
+- `SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `SHOPIFY_DOMAIN`: for baseline fetch during task generation, apply, and backfill.
 
-Replace all `/FULL/PATH/TO/` with actual absolute paths.
-
-Restart Claude Desktop. You should see a GSC tool icon in the interface.
-
-### 1.4 Connect to Cursor
-
-Cursor → Settings → Cursor Settings → Tools and integrations → New MCP server.
-
-Add:
-```json
-{
-  "gsc": {
-    "command": "/FULL/PATH/TO/mcp-gsc/.venv/bin/python",
-    "args": ["/FULL/PATH/TO/mcp-gsc/gsc_server.py"],
-    "env": {
-      "GSC_CREDENTIALS_PATH": "/FULL/PATH/TO/ahuru_gsc.json",
-      "GSC_SKIP_OAUTH": "true"
-    }
-  }
-}
-```
-
-### 1.5 First Queries to Run
-
-Once connected, open Claude Desktop and ask:
-
-```
-What are the top 20 queries for ahurucandles.co.nz by impressions in the last 90 days?
-```
-
-```
-Which pages on ahurucandles.co.nz have more than 100 impressions but less than 3% CTR?
-Suggest improved meta titles for each.
-```
-
-```
-Are there any keyword cannibalisation issues on ahurucandles.co.nz?
-Cross-reference pages competing for the same queries and recommend which page should own each query.
-```
-
-```
-Which queries for ahurucandles.co.nz are ranking in positions 5–15 with more than 30 impressions?
-These are quick wins — what content changes would push them to page 1?
-```
-
-```
-Check the indexing status of these pages:
-- https://www.ahurucandles.co.nz/collections/fidget-rings-nz
-- https://www.ahurucandles.co.nz/blogs/fidget-ring
-- https://www.ahurucandles.co.nz/collections/anxiety-rings-nz
-Are there any crawl or indexing issues?
-```
-
----
-
-## Part 2: Automated Weekly Report (GitHub Actions)
-
-Runs every Sunday. Fetches GSC data, analyses it, generates a Markdown report via Claude API, and commits it to `reports/`.
-
-### 2.1 Repository Secrets
-
-Go to: GitHub repo → Settings → Secrets and variables → Actions → New repository secret
-
-Add two secrets:
-
-**`GOOGLE_SERVICE_ACCOUNT_JSON`**
-The full contents of your `service_account.json` file (the entire JSON as a string).
-
-**`ANTHROPIC_API_KEY`**
-Your Anthropic API key from [console.anthropic.com](https://console.anthropic.com).
-
-**Shopify baseline SEO (optional but recommended)**  
-The same three secrets as the Apply SEO Changes workflow (`SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `SHOPIFY_DOMAIN`) let the weekly run populate `previous_seo_*` on new `meta_update` tasks. If they are omitted, task generation still works; baseline fields stay empty until you run apply or [`src/backfill_previous_seo.py`](src/backfill_previous_seo.py). Set `SEO_SKIP_BASELINE_FETCH=1` to disable baseline fetches even when credentials exist.
-
-### 2.2 Verify Your GSC Property URL
-
-Open `src/gsc_fetch.py` and confirm `SITE_URL` matches your GSC property exactly.
-
-Check in GSC: the property URL is shown in the top-left dropdown. It will be either:
-- `https://www.ahurucandles.co.nz/` (URL prefix property)
-- `sc-domain:ahurucandles.co.nz` (Domain property)
-
-Update `SITE_URL` in `gsc_fetch.py` to match.
-
-### 2.3 Local Test Run
-
-Before relying on GitHub Actions, test locally:
+Run pipelines:
 
 ```bash
-# Clone this repo
-git clone https://github.com/YOUR_USERNAME/ahuru-seo.git
-cd ahuru-seo
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Place your service account key
-mkdir credentials
-cp ~/path/to/your/service_account.json credentials/service_account.json
-
-# Set your Anthropic API key
-export ANTHROPIC_API_KEY=sk-ant-...
-
-# Run the full pipeline
 python src/run_weekly.py
+python src/run_monthly.py
+python src/apply_changes.py --dry-run
 ```
-
-The report will appear at `reports/YYYY-MM-DD.md` and `reports/latest.md`.
-
-### 2.4 First GitHub Actions Run
-
-After pushing to GitHub and setting the secrets:
-
-1. Go to: GitHub repo → Actions tab → Weekly SEO Report
-2. Click **Run workflow** → Run workflow (manual trigger)
-3. Watch the run — it should complete in ~60 seconds
-4. Check `reports/latest.md` in the repo for output
-
-If it fails, check the Actions log. Common issues:
-- Wrong `SITE_URL` in `gsc_fetch.py` — must match GSC property exactly
-- Service account not added to GSC property as a user
-- `ANTHROPIC_API_KEY` secret not set
-
-### 2.5 Schedule
-
-The workflow runs **every Sunday at 8am UTC** (8–9pm NZ time).
-
-To change the schedule, edit `.github/workflows/weekly_report.yml` and update the cron expression. [crontab.guru](https://crontab.guru) is useful for this.
 
 ---
 
-## Project Structure
+## Interactive analysis (mcp-gsc)
+
+Use a GSC service account with access to the property (Search Console → Settings → Users; **Full** is typical for complete data).
+
+1. In Google Cloud: enable **Google Search Console API**, create a service account, download JSON.
+2. Clone [mcp-gsc](https://github.com/AminForou/mcp-gsc), create a venv, `pip install -r requirements.txt`.
+3. Point MCP config at the venv’s Python, `gsc_server.py`, and set `GSC_CREDENTIALS_PATH` plus `GSC_SKIP_OAUTH=true`.
+
+**Cursor:** Settings → MCP → add a server with the same `command`, `args`, and `env` as in the upstream mcp-gsc docs.
+
+**Example questions once connected:**
+
+- What are the top 20 queries for ahurucandles.co.nz by impressions in the last 90 days?
+- Which pages have high impressions but CTR under 3%, and what title tweaks would you suggest?
+- Any cannibalisation between URLs competing for the same queries?
+
+---
+
+## Project structure
 
 ```
-ahuru-seo/
-├── .github/
-│   └── workflows/
-│       └── weekly_report.yml   ← GitHub Actions cron job
+ahuru/
+├── .github/workflows/
+│   ├── weekly_report.yml
+│   ├── monthly_report.yml
+│   ├── apply_changes.yml
+│   └── github-pages.yml
 ├── src/
-│   ├── gsc_fetch.py            ← Pulls GSC data via API
-│   ├── analyse.py              ← Processes data into insight buckets
-│   ├── report.py               ← Calls Claude API, generates report
-│   └── run_weekly.py           ← Orchestrates all three steps
+│   ├── gsc_fetch.py
+│   ├── gsc_fetch_monthly.py
+│   ├── analyse.py
+│   ├── analyse_monthly.py
+│   ├── report.py
+│   ├── report_monthly.py
+│   ├── run_weekly.py
+│   ├── run_monthly.py
+│   ├── generate_changes.py
+│   ├── baseline_seo.py
+│   ├── shopify_client.py
+│   ├── apply_changes.py
+│   ├── backfill_previous_seo.py
+│   └── email_report.py
 ├── prompts/
-│   └── system_prompt.md        ← Ahuru brand context for Claude
+│   ├── system_prompt.md
+│   └── system_prompt_monthly.md
 ├── reports/
-│   ├── README.md
-│   ├── latest.md               ← Most recent report (auto-updated)
-│   └── YYYY-MM-DD.md           ← Dated archive
-├── credentials/                ← Gitignored — local dev only
-├── data/                       ← Gitignored — raw GSC JSON
+│   ├── latest.md
+│   ├── YYYY-MM-DD.md
+│   └── monthly/
+│       ├── latest.md
+│       └── YYYY-MM.md
+├── dashboard.html           # approval UI + SEO reports tab (deployed to GitHub Pages)
+├── pending/                 # dated *-changes.json manifests (JSON often untracked)
+├── logs/                    # apply audit JSON (tracked where not gitignored)
+├── data/                    # raw GSC dumps (gitignored)
+├── credentials/             # local service_account.json (gitignored)
+├── seo_tasks.json
 ├── requirements.txt
-├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Extending the Pipeline
+## Extending
 
-### Add Shopify data
+- **Shopify in chat:** you can add [shopify-mcp](https://github.com/GeLi2001/shopify-mcp) (or Cursor’s Shopify MCP) next to GSC MCP to cross-check impressions with catalogue or orders.
+- **GA4 (not wired in yet):** this repo’s scripts do not call Google Analytics. If you extend the pipeline later, you could use the same Cloud project to enable the Analytics Data API and grant the service account Viewer access in GA4 for session or conversion context alongside GSC.
 
-Install and configure [`GeLi2001/shopify-mcp`](https://github.com/GeLi2001/shopify-mcp) alongside mcp-gsc in your Claude config:
+---
 
-```json
-{
-  "mcpServers": {
-    "gsc": { ... },
-    "shopify": {
-      "command": "npx",
-      "args": [
-        "shopify-mcp",
-        "--accessToken", "YOUR_SHOPIFY_ACCESS_TOKEN",
-        "--domain",      "ahurucandles.myshopify.com"
-      ]
-    }
-  }
-}
-```
+## Cost
 
-Then ask Claude: *"Which fidget ring pages are getting impressions in GSC but have zero corresponding sales in Shopify this month?"*
-
-### Add GA4 data
-
-The same service account works for GA4. Enable the Google Analytics Data API in your Cloud project, add the service account as a Viewer in GA4, then fetch session/conversion data alongside GSC data.
-
-### Cost
-
-At current Claude API pricing, each weekly report costs approximately $0.05–0.15 NZD depending on data volume. Negligible.
+At typical Claude API usage, each generated report is on the order of a few cents NZD per run. Resend is usually negligible at this volume if you stay within their free tier. Report emails are **short** (highlights only), which keeps message size small compared to sending the full Markdown.

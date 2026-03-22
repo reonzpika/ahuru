@@ -1,10 +1,11 @@
 """
 email_report.py
-Converts the Markdown SEO report to a clean HTML email and sends via Resend.
+Builds a short HTML email (report highlights) and sends via Resend.
+Full Markdown lives on the GitHub Pages dashboard; the email links there.
 
 From:    ahuru-seo-report@clinicpro.co.nz
 To:      info@ahurucandles.com, ryo@clinicpro.co.nz
-Trigger: called from run_weekly.py after save_report()
+Trigger: called from run_weekly.py / run_monthly.py after save_report()
 """
 
 import os
@@ -20,6 +21,9 @@ import requests as _requests
 RESEND_API_URL = "https://api.resend.com/emails"
 FROM_ADDRESS   = "Āhuru SEO Report <ahuru-seo-report@clinicpro.co.nz>"
 TO_ADDRESSES   = ["info@ahurucandles.com", "ryo@clinicpro.co.nz"]
+
+# Full Markdown reports are published on GitHub Pages; email sends highlights only.
+DASHBOARD_REPORT_URL = "https://reonzpika.github.io/ahuru/dashboard.html"
 
 
 # ── Markdown → HTML ───────────────────────────────────────────────────────────
@@ -155,10 +159,39 @@ def _inline(text):
     return text
 
 
+# ── Teaser (highlights) for email ─────────────────────────────────────────────
+
+
+def extract_teaser_markdown(md: str, *, max_h2_sections: int = 2, max_chars: int = 4500) -> str:
+    """
+    Returns the start of the report: title, intro, and the first N top-level ## sections.
+    Avoids emailing the full Markdown; the dashboard hosts the complete file.
+    """
+    if not md or not md.strip():
+        return md
+    lines = md.split("\n")
+    out: list[str] = []
+    h2_count = 0
+    for line in lines:
+        if re.match(r"^## [^#]", line):
+            h2_count += 1
+            if h2_count > max_h2_sections:
+                break
+        out.append(line)
+    teaser = "\n".join(out).strip()
+    if len(teaser) > max_chars:
+        teaser = teaser[:max_chars]
+        cut = teaser.rfind("\n")
+        if cut > max_chars // 2:
+            teaser = teaser[:cut]
+        teaser = teaser.rstrip() + "\n\n_(Truncated. Full report on the dashboard.)_"
+    return teaser
+
+
 # ── HTML wrapper ──────────────────────────────────────────────────────────────
 
-def wrap_html(body_html, report_date, summary):
-    """Wraps the report body in a full HTML email template."""
+def wrap_html(body_html, report_date, summary, *, dashboard_url: str = DASHBOARD_REPORT_URL):
+    """Wraps the report body in a full HTML email template (highlights + dashboard CTA)."""
 
     clicks_wow = summary.get("clicks_wow_pct")
     impr_wow   = summary.get("impressions_wow_pct")
@@ -175,7 +208,7 @@ def wrap_html(body_html, report_date, summary):
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Āhuru SEO Report — {report_date}</title>
+  <title>Āhuru SEO Report: {report_date}</title>
 </head>
 <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a202c;">
 
@@ -207,16 +240,37 @@ def wrap_html(body_html, report_date, summary):
       </div>
     </div>
 
-    <!-- Report body -->
+    <!-- Highlights notice + dashboard CTA -->
+    <div style="margin:0;padding:20px 32px 0;">
+      <div style="background:#fffbeb;border-left:4px solid #d97706;padding:16px 20px;border-radius:0 8px 8px 0;">
+        <p style="margin:0 0 8px;font-weight:bold;color:#92400e;font-size:14px;">Highlights only</p>
+        <p style="margin:0;font-size:14px;line-height:1.55;color:#78350f;">
+          This email is a short extract. The full Markdown report (and archives) lives on the dashboard under
+          <strong>SEO reports</strong>. You only need a GitHub token for tasks, not for reading the report.
+        </p>
+        <p style="margin:14px 0 0;">
+          <a href="{dashboard_url}" style="display:inline-block;background:#5c0f12;color:#ffffff;padding:10px 22px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">Open full report</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Report body (teaser) -->
     <div style="padding:28px 32px;">
       {body_html}
+    </div>
+
+    <div style="padding:0 32px 28px;">
+      <p style="margin:0;text-align:center;">
+        <a href="{dashboard_url}" style="color:#2d5a9e;font-weight:600;font-size:15px;">Read the complete report on the dashboard</a>
+      </p>
     </div>
 
     <!-- Footer -->
     <div style="background:#f1f5f9;padding:16px 32px;border-top:1px solid #e2e8f0;">
       <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">
-        Generated automatically by the Āhuru SEO pipeline · 
+        Generated automatically by the Āhuru SEO pipeline ·
         <a href="https://github.com/reonzpika/ahuru" style="color:#64748b;">View repo</a>
+        · <a href="{dashboard_url}" style="color:#64748b;">Dashboard</a>
       </p>
     </div>
 
@@ -229,11 +283,11 @@ def wrap_html(body_html, report_date, summary):
 
 def send_report(report_text, summary):
     """
-    Converts Markdown report to HTML and sends via Resend API.
-    Uses only stdlib (urllib) — no extra dependencies.
+    Sends a highlights email via Resend: first part of the Markdown plus KPI strip,
+    with links to the full report on the GitHub Pages dashboard.
 
     Args:
-        report_text: Full Markdown string of the report
+        report_text: Full Markdown string of the report (teaser is derived from this)
         summary:     Dict from analyse() with click/impression stats
     """
     api_key = os.environ.get("RESEND_API_KEY")
@@ -242,20 +296,27 @@ def send_report(report_text, summary):
 
     report_date = datetime.now(timezone.utc).strftime("%d %B %Y")
 
-    print("Converting Markdown to HTML...")
-    body_html = markdown_to_html(report_text)
-    full_html = wrap_html(body_html, report_date, summary)
+    teaser_md = extract_teaser_markdown(report_text)
+    print("Converting teaser Markdown to HTML...")
+    body_html = markdown_to_html(teaser_md)
+    full_html = wrap_html(body_html, report_date, summary, dashboard_url=DASHBOARD_REPORT_URL)
 
-    # Plain text fallback — strip Markdown for email clients that prefer it
-    plain_text = re.sub(r"[#*`]", "", report_text)
+    # Plain text: teaser + dashboard link
+    plain_text = re.sub(r"[#*`]", "", teaser_md)
     plain_text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", plain_text)
+    plain_text = (
+        plain_text.strip()
+        + "\n\n---\nFull report (all sections and archives): "
+        + DASHBOARD_REPORT_URL
+        + "\n"
+    )
 
     report_type = summary.get("_report_type", "weekly")
     report_month = summary.get("_report_month", "")
     if report_type == "monthly":
-        subject = f"Āhuru SEO Monthly Report — {report_month}"
+        subject = f"Āhuru SEO Monthly Report (highlights): {report_month}"
     else:
-        subject = f"Āhuru SEO Weekly Report — {report_date}"
+        subject = f"Āhuru SEO Weekly Report (highlights): {report_date}"
 
     payload = {
         "from": FROM_ADDRESS,
@@ -280,7 +341,7 @@ def send_report(report_text, summary):
 
     if response.status_code == 200 or response.status_code == 201:
         result = response.json()
-        print(f"✓ Email sent — ID: {result.get('id', 'unknown')}")
+        print(f"✓ Email sent: ID {result.get('id', 'unknown')}")
         return result
     else:
         raise RuntimeError(f"Resend API error {response.status_code}: {response.text}")

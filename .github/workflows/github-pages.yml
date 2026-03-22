@@ -27,9 +27,53 @@ jobs:
 
       - name: Prepare static bundle
         run: |
-          mkdir -p publish
+          mkdir -p publish/reports
           cp dashboard.html publish/
           cp dashboard.html publish/index.html
+          python3 << 'PY'
+          import glob
+          import json
+          import os
+          import shutil
+
+          os.makedirs("publish/reports", exist_ok=True)
+          latest_src = "reports/latest.md"
+          if os.path.isfile(latest_src):
+              shutil.copy(latest_src, os.path.join("publish/reports", "latest.md"))
+          weekly = sorted(glob.glob("reports/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md"))
+          names = [os.path.basename(p) for p in weekly]
+          for path in weekly:
+              shutil.copy(path, os.path.join("publish/reports", os.path.basename(path)))
+          payload = {
+              "archives": names,
+              "newest": names[-1] if names else None,
+          }
+          with open("publish/reports/archive-index.json", "w", encoding="utf-8") as f:
+              json.dump(payload, f, indent=2)
+              f.write("\n")
+
+          monthly_src = "reports/monthly"
+          monthly_pub = "publish/reports/monthly"
+          os.makedirs(monthly_pub, exist_ok=True)
+          if os.path.isdir(monthly_src):
+              for path in glob.glob(os.path.join(monthly_src, "*.md")):
+                  shutil.copy(path, os.path.join(monthly_pub, os.path.basename(path)))
+              monthly_dated = sorted(
+                  glob.glob(os.path.join(monthly_src, "[0-9][0-9][0-9][0-9]-[0-9][0-9].md"))
+              )
+              monthly_names = [os.path.basename(p) for p in monthly_dated]
+              monthly_payload = {
+                  "archives": monthly_names,
+                  "newest": monthly_names[-1] if monthly_names else None,
+              }
+              with open(
+                  os.path.join(monthly_pub, "archive-index.json"),
+                  "w",
+                  encoding="utf-8",
+              ) as f:
+                  json.dump(monthly_payload, f, indent=2)
+                  f.write("\n")
+          PY
 
       - uses: actions/configure-pages@v5
 
