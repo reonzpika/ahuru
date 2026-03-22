@@ -7,17 +7,17 @@
       "resource": "article",
       "handle": "best-essential-oils-for-diffusers-guide",
       "shopify_url": "https://www.ahurucandles.co.nz/blogs/guide/best-essential-oils-for-diffusers-guide",
-      "status": "approved",
+      "status": "applied",
       "auto_apply": true,
       "priority": 1,
       "created_date": "2026-03-18",
       "expires_date": "2026-04-15",
       "approved_date": null,
-      "applied_date": null,
+      "applied_date": "2026-03-22",
       "dismissed_date": null,
-      "previous_seo_title": null,
-      "previous_seo_description": null,
-      "proposed_seo_title": "Best Essential Oils for Diffusers \u2014 NZ Guide | \u0100huru",
+      "previous_seo_title": "",
+      "previous_seo_description": "",
+      "proposed_seo_title": "Best Essential Oils for Diffusers — NZ Guide | Āhuru",
       "proposed_seo_description": "Not sure which oils to use in your diffuser? Our NZ guide covers the best essential oils for sleep, energy, stress & more. Pure oils, no synthetics.",
       "impressions_at_creation": 196605,
       "ctr_at_creation": 0.34,
@@ -32,18 +32,18 @@
       "resource": "product",
       "handle": "meri-kirihimete-christmas-card",
       "shopify_url": "https://www.ahurucandles.co.nz/products/meri-kirihimete-christmas-card",
-      "status": "approved",
+      "status": "rolled_back",
       "auto_apply": true,
       "priority": 2,
       "created_date": "2026-03-18",
       "expires_date": "2026-04-15",
       "approved_date": null,
-      "applied_date": null,
+      "applied_date": "2026-03-22",
       "dismissed_date": null,
-      "previous_seo_title": null,
-      "previous_seo_description": null,
-      "proposed_seo_title": "Meri Kirihimete \u2014 NZ Christmas Card | \u0100huru",
-      "proposed_seo_description": "Say Meri Kirihimete with a beautiful NZ-made Christmas card from \u0100huru. Perfect for gifting with a candle or wellness bundle. Free NZ shipping available.",
+      "previous_seo_title": "",
+      "previous_seo_description": "",
+      "proposed_seo_title": "Meri Kirihimete — NZ Christmas Card | Āhuru",
+      "proposed_seo_description": "Say Meri Kirihimete with a beautiful NZ-made Christmas card from Āhuru. Perfect for gifting with a candle or wellness bundle. Free NZ shipping available.",
       "impressions_at_creation": 54151,
       "ctr_at_creation": 0.05,
       "position_at_creation": 5.3,
@@ -67,8 +67,8 @@
       "dismissed_date": null,
       "previous_seo_title": null,
       "previous_seo_description": null,
-      "proposed_seo_title": "Scented Tea Light Candles NZ \u2014 Pure Essential Oils | \u0100huru",
-      "proposed_seo_description": "Discover NZ-made scented tea light candles with pure essential oils \u2014 no synthetic fragrance. Lavender, peppermint, cedarwood & more. Shop \u0100huru online.",
+      "proposed_seo_title": "Scented Tea Light Candles NZ — Pure Essential Oils | Āhuru",
+      "proposed_seo_description": "Discover NZ-made scented tea light candles with pure essential oils — no synthetic fragrance. Lavender, peppermint, cedarwood & more. Shop Āhuru online.",
       "impressions_at_creation": 8802,
       "ctr_at_creation": 0.06,
       "position_at_creation": 2.4,
@@ -92,7 +92,7 @@
       "dismissed_date": null,
       "previous_seo_title": null,
       "previous_seo_description": null,
-      "proposed_seo_title": "Best Oil Diffuser for Gamers \u2014 Relaxation & Focus | \u0100huru",
+      "proposed_seo_title": "Best Oil Diffuser for Gamers — Relaxation & Focus | Āhuru",
       "proposed_seo_description": "Help a gamer unwind with an aromatherapy oil diffuser. Essential oils for focus, stress relief & better sleep. NZ-made blends, fast NZ shipping.",
       "impressions_at_creation": 2908,
       "ctr_at_creation": 0.1,
@@ -124,7 +124,7 @@
       "position_at_creation": 5.2,
       "dismissal_threshold_impressions": null,
       "report_date": "2026-03-18",
-      "notes": "Position 5.2 with 42094 impressions \u2014 content update needed to reach page 1"
+      "notes": "Position 5.2 with 42094 impressions — content update needed to reach page 1"
     },
     {
       "id": "content_update__best-essential-oils-for-diffusers-guide",
@@ -149,7 +149,7 @@
       "position_at_creation": 5.9,
       "dismissal_threshold_impressions": null,
       "report_date": "2026-03-18",
-      "notes": "Position 5.9 with 2189 impressions \u2014 content update needed to reach page 1"
+      "notes": "Position 5.9 with 2189 impressions — content update needed to reach page 1"
     },
     {
       "id": "content_update__fidget-rings-nz",
@@ -174,7 +174,7 @@
       "position_at_creation": 5.4,
       "dismissal_threshold_impressions": null,
       "report_date": "2026-03-18",
-      "notes": "Position 5.4 with 908 impressions \u2014 content update needed to reach page 1"
+      "notes": "Position 5.4 with 908 impressions — content update needed to reach page 1"
     },
     {
       "id": "content_update__fidget-ring",
@@ -199,7 +199,7 @@
       "position_at_creation": 8.3,
       "dismissal_threshold_impressions": null,
       "report_date": "2026-03-18",
-      "notes": "Position 8.3 with 786 impressions \u2014 content update needed to reach page 1"
+      "notes": "Position 8.3 with 786 impressions — content update needed to reach page 1"
     },
     {
       "id": "content_update__best-cheap-scented-candles-nz-1",
@@ -224,7 +224,7 @@
       "position_at_creation": 6.8,
       "dismissal_threshold_impressions": null,
       "report_date": "2026-03-18",
-      "notes": "Position 6.8 with 429 impressions \u2014 content update needed to reach page 1"
+      "notes": "Position 6.8 with 429 impressions — content update needed to reach page 1"
     },
     {
       "id": "canonical__best-essential-oils-for-diffusers-guide",
@@ -249,7 +249,7 @@
       "position_at_creation": 0.0,
       "dismissal_threshold_impressions": null,
       "report_date": "2026-03-18",
-      "notes": "4 pages competing for 'essential oils for diffuser' \u2014 10850 total impressions"
+      "notes": "4 pages competing for 'essential oils for diffuser' — 10850 total impressions"
     }
   ]
 }

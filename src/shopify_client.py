@@ -139,12 +139,85 @@ def update_product_seo(product_id: str, seo_title: str, seo_description: str) ->
 
 
 # ── Article SEO ───────────────────────────────────────────────────────────────
+# Blog articles do not expose `seo` on the Article GraphQL type. Search engine
+# listing title and description are stored as `global` metafields `title_tag` and
+# `description_tag` (same pattern as the Shopify Admin search listing UI).
+
+
+def _article_metafields_to_seo(edges: list) -> tuple[str, str]:
+    """Maps global title_tag / description_tag metafield edges to seo_title, seo_description."""
+    by_key: dict[str, str] = {}
+    for edge in edges:
+        node = edge.get("node") or {}
+        key = node.get("key")
+        if key in ("title_tag", "description_tag"):
+            by_key[key] = node.get("value") or ""
+    return by_key.get("title_tag", ""), by_key.get("description_tag", "")
+
+
+def _article_seo_metafield_inputs(
+    article_id: str,
+    seo_title: str,
+    seo_description: str,
+) -> list[dict]:
+    """
+    Builds MetafieldInput list for article SEO, using metafield id when the
+    field already exists (required by Shopify for updates set in Admin).
+    """
+    query = """
+    query ArticleSeoMetafields($id: ID!) {
+      article(id: $id) {
+        id
+        metafields(first: 20, namespace: "global") {
+          edges {
+            node {
+              id
+              key
+              namespace
+              value
+            }
+          }
+        }
+      }
+    }
+    """
+    data = _graphql(query, {"id": article_id})
+    article = data.get("article")
+    if not article:
+        raise RuntimeError(f"Article not found for id: {article_id!r}")
+
+    edges = article.get("metafields", {}).get("edges", [])
+    by_key: dict[str, dict] = {}
+    for edge in edges:
+        node = edge.get("node") or {}
+        k = node.get("key")
+        if k in ("title_tag", "description_tag"):
+            by_key[k] = node
+
+    inputs: list[dict] = []
+    for key, new_val in (
+        ("title_tag", seo_title),
+        ("description_tag", seo_description),
+    ):
+        existing = by_key.get(key)
+        if existing and existing.get("id"):
+            inputs.append({"id": existing["id"], "value": new_val})
+        else:
+            inputs.append({
+                "namespace": "global",
+                "key": key,
+                "value": new_val,
+                "type": "single_line_text_field",
+            })
+    return inputs
+
 
 def get_article_seo(handle: str) -> dict:
     """
     Fetches current SEO fields for a blog article by handle.
     Searches across all blogs (up to 20) and all articles (up to 100 per blog).
     Uses exact handle matching — does not rely on fuzzy query filter.
+    SEO values come from global metafields title_tag and description_tag.
     Raises RuntimeError if not found.
     Returns {"id": "gid://shopify/Article/...", "seo_title": "...", "seo_description": "..."}.
     """
@@ -159,9 +232,13 @@ def get_article_seo(handle: str) -> dict:
                 node {
                   id
                   handle
-                  seo {
-                    title
-                    description
+                  metafields(first: 20, namespace: "global") {
+                    edges {
+                      node {
+                        key
+                        value
+                      }
+                    }
                   }
                 }
               }
@@ -179,10 +256,12 @@ def get_article_seo(handle: str) -> dict:
         for article_edge in articles:
             node = article_edge["node"]
             if node["handle"] == handle:
+                edges = node.get("metafields", {}).get("edges", [])
+                seo_title, seo_description = _article_metafields_to_seo(edges)
                 return {
                     "id": node["id"],
-                    "seo_title": node["seo"]["title"] or "",
-                    "seo_description": node["seo"]["description"] or "",
+                    "seo_title": seo_title,
+                    "seo_description": seo_description,
                 }
 
     raise RuntimeError(
@@ -193,19 +272,17 @@ def get_article_seo(handle: str) -> dict:
 
 def update_article_seo(article_id: str, seo_title: str, seo_description: str) -> dict:
     """
-    Updates SEO title and description for an article.
+    Updates SEO title and description for an article via global metafields.
     Raises RuntimeError if userErrors is non-empty.
     Returns the updated article data.
     """
+    metafields = _article_seo_metafield_inputs(article_id, seo_title, seo_description)
     mutation = """
-    mutation UpdateArticleSEO($id: ID!, $seo: SEOInput!) {
-      articleUpdate(id: $id, article: {seo: $seo}) {
+    mutation UpdateArticleSEO($id: ID!, $article: ArticleUpdateInput!) {
+      articleUpdate(id: $id, article: $article) {
         article {
           id
-          seo {
-            title
-            description
-          }
+          handle
         }
         userErrors {
           field
@@ -216,7 +293,7 @@ def update_article_seo(article_id: str, seo_title: str, seo_description: str) ->
     """
     data = _graphql(mutation, {
         "id": article_id,
-        "seo": {"title": seo_title, "description": seo_description},
+        "article": {"metafields": metafields},
     })
     result = data.get("articleUpdate", {})
     user_errors = result.get("userErrors", [])

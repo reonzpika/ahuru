@@ -1,0 +1,62 @@
+[
+  {
+    "task_id": "meta_update__best-essential-oils-for-diffusers-guide",
+    "resource": "article",
+    "handle": "best-essential-oils-for-diffusers-guide",
+    "applied_at": "2026-03-22T00:35:15Z",
+    "dry_run": true,
+    "previous_seo_title": "",
+    "previous_seo_description": "",
+    "new_seo_title": "Best Essential Oils for Diffusers — NZ Guide | Āhuru",
+    "new_seo_description": "Not sure which oils to use in your diffuser? Our NZ guide covers the best essential oils for sleep, energy, stress & more. Pure oils, no synthetics.",
+    "result": "dry_run"
+  },
+  {
+    "task_id": "meta_update__meri-kirihimete-christmas-card",
+    "resource": "product",
+    "handle": "meri-kirihimete-christmas-card",
+    "applied_at": "2026-03-22T00:35:17Z",
+    "dry_run": true,
+    "previous_seo_title": "",
+    "previous_seo_description": "",
+    "new_seo_title": "Meri Kirihimete — NZ Christmas Card | Āhuru",
+    "new_seo_description": "Say Meri Kirihimete with a beautiful NZ-made Christmas card from Āhuru. Perfect for gifting with a candle or wellness bundle. Free NZ shipping available.",
+    "result": "dry_run"
+  },
+  {
+    "task_id": "meta_update__best-essential-oils-for-diffusers-guide",
+    "resource": "article",
+    "handle": "best-essential-oils-for-diffusers-guide",
+    "applied_at": "2026-03-22T00:35:25Z",
+    "dry_run": false,
+    "previous_seo_title": "",
+    "previous_seo_description": "",
+    "new_seo_title": "Best Essential Oils for Diffusers — NZ Guide | Āhuru",
+    "new_seo_description": "Not sure which oils to use in your diffuser? Our NZ guide covers the best essential oils for sleep, energy, stress & more. Pure oils, no synthetics.",
+    "result": "applied"
+  },
+  {
+    "task_id": "meta_update__meri-kirihimete-christmas-card",
+    "resource": "product",
+    "handle": "meri-kirihimete-christmas-card",
+    "applied_at": "2026-03-22T00:35:29Z",
+    "dry_run": false,
+    "previous_seo_title": "",
+    "previous_seo_description": "",
+    "new_seo_title": "Meri Kirihimete — NZ Christmas Card | Āhuru",
+    "new_seo_description": "Say Meri Kirihimete with a beautiful NZ-made Christmas card from Āhuru. Perfect for gifting with a candle or wellness bundle. Free NZ shipping available.",
+    "result": "applied"
+  },
+  {
+    "task_id": "meta_update__meri-kirihimete-christmas-card",
+    "resource": "product",
+    "handle": "meri-kirihimete-christmas-card",
+    "applied_at": "2026-03-22T00:35:42Z",
+    "dry_run": false,
+    "previous_seo_title": "Meri Kirihimete — NZ Christmas Card | Āhuru",
+    "previous_seo_description": "Say Meri Kirihimete with a beautiful NZ-made Christmas card from Āhuru. Perfect for gifting with a candle or wellness bundle. Free NZ shipping available.",
+    "new_seo_title": "",
+    "new_seo_description": "",
+    "result": "rolled_back"
+  }
+]

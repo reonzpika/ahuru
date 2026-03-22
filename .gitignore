@@ -2,6 +2,8 @@
 credentials/
 *.json
 !reports/*.md
+!seo_tasks.json
+!logs/*.json
 
 # Raw GSC data — large files, don't need version control
 data/
