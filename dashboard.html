@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html class="light" lang="en-NZ">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ĀhuruSEO — Approval Dashboard</title>
+  <!-- CORS: raw.githubusercontent.com allows reads (ACAO *). api.github.com PUT + Actions dispatch may be blocked from some origins; verify in DevTools on the deployed GitHub Pages URL with a real PAT. -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#5C0F12',
+            'primary-container': '#7A2626',
+            'on-primary': '#FFFFFF',
+            surface: '#FBF9F4',
+            'surface-container-low': '#F5F3EE',
+            'surface-container': '#EDE9E3',
+            'surface-container-high': '#EAE8E3',
+            'surface-container-highest': '#E4E2DD',
+            'surface-container-lowest': '#FFFFFF',
+            'on-surface': '#1C1B1A',
+            'on-surface-variant': '#4A4541',
+            secondary: '#635E54',
+            'outline-variant': '#C8C4BE',
+            error: '#93000A',
+            'error-container': '#FFDAD6',
+            'on-error-container': '#93000A',
+            tertiary: '#554738',
+            background: '#FBF9F4',
+          },
+          fontFamily: {
+            headline: ['Plus Jakarta Sans', 'sans-serif'],
+            body: ['Manrope', 'sans-serif'],
+            label: ['Manrope', 'sans-serif'],
+          },
+          borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+          boxShadow: {
+            card: '0px 4px 40px rgba(28,27,26,0.04)',
+            'card-hover': '0px 4px 40px rgba(28,27,26,0.08)',
+            float: '0px 20px 40px rgba(85,66,65,0.06)',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: Manrope, sans-serif;
+      background-color: #fbf9f4;
+      color: #1c1b1a;
+    }
+    h1, h2, h3, .font-headline {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .shadow-card { box-shadow: 0px 4px 40px rgba(28, 27, 26, 0.04); }
+    .shadow-card-hover:hover { box-shadow: 0px 4px 40px rgba(28, 27, 26, 0.08); }
+    .shadow-float { box-shadow: 0px 20px 40px rgba(85, 66, 65, 0.06); }
+    .gradient-cta {
+      background: linear-gradient(135deg, #5c0f12, #7a2626);
+    }
+    input.pat-input, input.borderless-input {
+      border: none;
+      border-bottom: 1px solid rgba(200, 196, 190, 0.35);
+      border-radius: 0;
+      background: transparent;
+    }
+    input.pat-input:focus, input.borderless-input:focus {
+      outline: none;
+      border-bottom-color: #5c0f12;
+      border-bottom-width: 2px;
+    }
+    .checkbox-pending {
+      accent-color: #5c0f12;
+    }
+    .card-fade-out {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased pb-28 md:pb-8">
+  <!-- PAT modal -->
+  <div id="pat-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-surface/95 backdrop-blur-md px-4">
+    <div class="w-full max-w-md rounded-2xl bg-surface-container-lowest p-8 shadow-float">
+      <h1 class="font-headline text-2xl font-bold text-on-surface mb-3">Welcome to ĀhuruSEO</h1>
+      <p class="text-on-surface-variant text-sm mb-6">Enter your GitHub Personal Access Token. It's stored only in your browser session.</p>
+      <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Token</label>
+      <input id="pat-input" type="password" autocomplete="off" class="pat-input w-full py-2 text-on-surface mb-2" placeholder="ghp_…" />
+      <p class="text-xs text-on-surface-variant mb-6">Token requires <code class="text-on-surface">repo</code> and <code class="text-on-surface">workflow</code> scopes</p>
+      <button type="button" id="pat-continue" class="gradient-cta text-on-primary font-headline font-bold rounded-full px-8 py-3 w-full text-center hover:opacity-95 transition-opacity">
+        Continue →
+      </button>
+      <p id="pat-error" class="mt-3 text-sm text-error hidden"></p>
+    </div>
+  </div>
+
+  <div id="app-root" class="hidden">
+    <header class="sticky top-0 z-40 w-full bg-surface/95 backdrop-blur-md">
+      <div class="flex max-w-7xl mx-auto items-center justify-between px-6 py-4">
+        <span class="text-xl font-bold text-primary font-headline tracking-tight">ĀhuruSEO</span>
+      </div>
+    </header>
+
+    <div class="flex max-w-7xl mx-auto min-h-screen relative">
+      <aside class="hidden lg:flex h-[calc(100vh-4rem)] w-64 shrink-0 sticky top-16 flex-col gap-2 p-6 bg-surface-container-low">
+        <div class="mb-6">
+          <h2 class="text-lg font-bold text-primary font-headline">SEO Tasks</h2>
+          <p class="text-xs text-on-surface-variant font-medium">Review and apply optimisations</p>
+        </div>
+        <nav class="flex flex-col gap-1 font-body text-sm font-medium" id="sidebar-nav">
+          <button type="button" data-tab="pending" class="tab-btn flex items-center gap-3 rounded-full px-4 py-2 transition-all bg-surface-container-lowest text-primary shadow-card">
+            <span class="material-symbols-outlined text-xl">pending_actions</span>
+            <span>Pending</span>
+          </button>
+          <button type="button" data-tab="applied" class="tab-btn flex items-center gap-3 rounded-full px-4 py-2 text-on-surface-variant hover:bg-surface-container-lowest/80 transition-all">
+            <span class="material-symbols-outlined text-xl">task_alt</span>
+            <span>Applied</span>
+          </button>
+          <button type="button" data-tab="dismissed" class="tab-btn flex items-center gap-3 rounded-full px-4 py-2 text-on-surface-variant hover:bg-surface-container-lowest/80 transition-all">
+            <span class="material-symbols-outlined text-xl">cancel</span>
+            <span>Dismissed</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="flex-1 p-6 md:p-10 mb-24 md:mb-32">
+        <!-- Summary bar (all tabs) -->
+        <div id="summary-bar" class="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left">
+            <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tasks Pending</p>
+            <p id="stat-pending" class="text-2xl font-bold text-primary font-headline">—</p>
+          </div>
+          <div class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left">
+            <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tasks Applied</p>
+            <p id="stat-applied-count" class="text-2xl font-bold text-primary font-headline">—</p>
+          </div>
+          <div class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left" id="stat-ctr-wrap" title="">
+            <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Avg CTR Lift</p>
+            <p id="stat-ctr" class="text-2xl font-bold text-primary font-headline">—</p>
+          </div>
+        </div>
+
+        <div id="fetch-error" class="hidden mb-6 rounded-xl bg-error-container px-4 py-3 text-on-error-container text-sm">
+          ⚠ Could not load tasks. Check your connection and refresh.
+        </div>
+
+        <!-- Pending -->
+        <section id="tab-pending" class="tab-panel">
+          <header class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 class="text-3xl font-extrabold text-on-surface font-headline tracking-tight mb-2">Pending Optimisations</h1>
+              <p class="text-tertiary font-medium">Review and approve suggested meta-data improvements.</p>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <span id="pending-badge" class="gradient-cta flex items-center gap-1 rounded-full px-3 py-1.5 font-headline font-semibold text-on-primary shadow-card">
+                <span class="material-symbols-outlined text-base">bolt</span>
+                <span id="pending-badge-count">0</span> Improvements Ready
+              </span>
+            </div>
+          </header>
+          <div id="pending-select-row" class="mb-4 flex items-center gap-2">
+            <input type="checkbox" id="select-all-pending" class="checkbox-pending h-4 w-4 rounded border-outline-variant" />
+            <label for="select-all-pending" class="text-sm text-on-surface-variant cursor-pointer select-none">
+              Select all (<span id="select-all-count">0</span>)
+            </label>
+          </div>
+          <div id="pending-loading" class="space-y-4 hidden"></div>
+          <div id="pending-list" class="space-y-4"></div>
+          <div id="pending-empty" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-high">
+              <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">pending_actions</span>
+            </div>
+            <h3 class="font-headline text-xl font-bold text-on-surface mb-2">All caught up</h3>
+            <p class="max-w-sm text-on-surface-variant">No pending tasks this week. The next report runs every Sunday.</p>
+          </div>
+        </section>
+
+        <!-- Applied -->
+        <section id="tab-applied" class="tab-panel hidden">
+          <header class="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h1 class="text-3xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Applied History</h1>
+              <p class="max-w-xl text-tertiary">Review the impact of your recent optimisations. Metrics are updated every Sunday based on Search Console data.</p>
+            </div>
+            <div class="text-left lg:text-right">
+              <span id="applied-header-ctr" class="font-headline text-2xl font-bold text-primary block">—</span>
+              <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Avg. CTR Lift</span>
+            </div>
+          </header>
+          <div id="applied-loading" class="space-y-4 hidden"></div>
+          <div id="applied-list" class="grid grid-cols-1 gap-6"></div>
+          <div id="applied-empty" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-high">
+              <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">task_alt</span>
+            </div>
+            <h3 class="font-headline text-xl font-bold text-on-surface mb-2">No changes applied yet</h3>
+            <p class="max-w-sm text-on-surface-variant">Approved tasks will appear here once applied.</p>
+          </div>
+        </section>
+
+        <!-- Dismissed -->
+        <section id="tab-dismissed" class="tab-panel hidden">
+          <header class="mb-10">
+            <h1 class="text-3xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Dismissed Tasks</h1>
+            <p class="text-tertiary font-medium">Suggestions you skipped or rejected.</p>
+          </header>
+          <div id="dismissed-loading" class="space-y-4 hidden"></div>
+          <div id="dismissed-list" class="grid grid-cols-1 gap-6 lg:grid-cols-2"></div>
+          <div id="dismissed-empty" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-high">
+              <span class="material-symbols-outlined text-5xl text-on-surface-variant/40">delete_sweep</span>
+            </div>
+            <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Nothing dismissed</h3>
+            <p class="max-w-sm text-on-surface-variant">All suggestions are either pending or have been applied.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Mobile tab bar -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 flex justify-around border-t border-transparent bg-surface/90 px-2 py-3 backdrop-blur-md md:hidden shadow-[0_-4px_40px_rgba(27,28,25,0.06)]" id="mobile-tabs" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+      <button type="button" data-tab="pending" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-primary">
+        <span class="material-symbols-outlined">pending_actions</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Pending</span>
+      </button>
+      <button type="button" data-tab="applied" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-on-surface-variant">
+        <span class="material-symbols-outlined">task_alt</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Applied</span>
+      </button>
+      <button type="button" data-tab="dismissed" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-on-surface-variant">
+        <span class="material-symbols-outlined">cancel</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Dismissed</span>
+      </button>
+    </nav>
+
+    <!-- Approve bar (mobile: above tab bar) -->
+    <div id="approve-bar" class="pointer-events-none fixed inset-x-0 z-50 hidden items-center justify-center px-4" style="bottom: max(5.25rem, env(safe-area-inset-bottom, 0px));">
+      <div class="pointer-events-auto flex w-full max-w-lg items-center justify-between gap-4 rounded-full bg-surface/80 px-6 py-4 shadow-[0_-4px_40px_rgba(27,28,25,0.06)] backdrop-blur-md">
+        <span class="text-sm font-bold text-on-surface"><span id="approve-count">0</span> items selected</span>
+        <button type="button" id="btn-approve-apply" class="gradient-cta flex shrink-0 items-center gap-2 rounded-full px-6 py-3 font-headline text-sm font-bold text-on-primary shadow-card hover:opacity-95 active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined text-lg">auto_fix_high</span>
+          Approve + Apply →
+        </button>
+      </div>
+    </div>
+    <div id="approve-bar-desktop" class="pointer-events-none fixed bottom-0 left-0 right-0 z-50 hidden items-center justify-center p-6 max-md:hidden">
+      <div class="pointer-events-auto flex items-center gap-8 rounded-full bg-surface/80 px-8 py-4 shadow-[0_-4px_40px_rgba(27,28,25,0.06)] backdrop-blur-md">
+        <div class="hidden md:flex flex-col">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-tertiary">Selected Tasks</span>
+          <span class="text-sm font-bold text-primary"><span id="approve-count-desktop">0</span> items selected</span>
+        </div>
+        <button type="button" id="btn-approve-apply-desktop" class="gradient-cta flex items-center gap-2 rounded-full px-8 py-3 font-headline font-bold tracking-wide text-on-primary shadow-card hover:opacity-95 active:scale-95 transition-all">
+          <span class="material-symbols-outlined">auto_fix_high</span>
+          Approve + Apply →
+        </button>
+      </div>
+    </div>
+
+    <!-- Rollback modal -->
+    <div id="rollback-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-on-surface/30 backdrop-blur-sm px-4">
+      <div class="max-h-[90vh] w-full max-w-lg overflow-auto rounded-2xl bg-surface-container-lowest p-6 shadow-float">
+        <h3 class="font-headline text-lg font-bold text-on-surface mb-4">Rollback</h3>
+        <p class="text-sm text-on-surface-variant mb-4">To rollback this change, run:</p>
+        <pre id="rollback-cmd" class="mb-6 overflow-x-auto rounded-xl bg-surface-container-low p-4 text-sm text-on-surface"></pre>
+        <button type="button" id="rollback-close" class="rounded-full bg-surface-container-high px-6 py-2 text-sm font-bold text-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toast-host" class="pointer-events-none fixed bottom-24 left-1/2 z-[110] flex -translate-x-1/2 flex-col items-center gap-2 md:bottom-8"></div>
+
+  <!-- Background decoration -->
+  <div class="pointer-events-none fixed top-0 right-0 -z-10 opacity-20">
+    <svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="450" cy="150" r="300" fill="url(#paint0_radial_dust)" />
+      <defs>
+        <radialGradient id="paint0_radial_dust" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 150) rotate(90) scale(300)">
+          <stop stop-color="#E8D0D0" />
+          <stop offset="1" stop-color="#FBF9F4" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  const PAT_KEY = 'ahuru_github_pat';
+
+  const CONFIG = {
+    owner: 'reonzpika',
+    repo: 'ahuru',
+    branch: 'main',
+    tasksPath: 'seo_tasks.json',
+    workflowId: 'apply_changes.yml',
+    pat: '',
+  };
+
+  const GH_HEADERS = () => ({
+    Authorization: 'Bearer ' + CONFIG.pat,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  });
+
+  let appData = { version: '1', tasks: [] };
+  let currentTab = 'pending';
+  let dismissingId = null;
+  let selectedIds = new Set();
+
+  function esc(s) {
+    if (s == null || s === '') return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /**
+   * Maps pipeline task.type to dashboard copy and layout kind.
+   * kind: meta | content | seo_other
+   */
+  function typeUi(type) {
+    const t = String(type || '').toLowerCase();
+    const known = {
+      meta_update: {
+        pill: 'Meta SEO',
+        title: 'Search snippet: meta title and description',
+        pendingBeforeEmpty: 'Meta title or meta description not set in Shopify Admin.',
+        kind: 'meta',
+      },
+      content_update: {
+        pill: 'Content',
+        title: 'On-page body copy or structure',
+        pendingBeforeEmpty: 'Page body is not snapshotted here. Open the live URL to compare.',
+        kind: 'content',
+      },
+      canonical: {
+        pill: 'Canonical',
+        title: 'Canonical URL consolidation',
+        pendingBeforeEmpty: 'No baseline stored for this task.',
+        kind: 'seo_other',
+      },
+      redirect: {
+        pill: 'Redirect',
+        title: 'URL redirect rule',
+        pendingBeforeEmpty: 'No baseline stored for this task.',
+        kind: 'seo_other',
+      },
+      noindex: {
+        pill: 'Noindex',
+        title: 'Search engine indexing control',
+        pendingBeforeEmpty: 'No baseline stored for this task.',
+        kind: 'seo_other',
+      },
+      internal_links: {
+        pill: 'Internal links',
+        title: 'Internal linking suggestions',
+        pendingBeforeEmpty: 'No baseline stored for this task.',
+        kind: 'seo_other',
+      },
+    };
+    if (known[t]) return known[t];
+    const raw = String(type || 'task');
+    return {
+      pill: raw.replace(/_/g, ' '),
+      title: 'SEO task',
+      pendingBeforeEmpty: 'No baseline stored for this task.',
+      kind: 'seo_other',
+    };
+  }
+
+  function typePillMarkup(type) {
+    const ui = typeUi(type);
+    return (
+      '<span class="rounded-full border border-primary/15 bg-primary/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary" title="' +
+      esc(ui.title) +
+      '">' +
+      esc(ui.pill) +
+      '</span>'
+    );
+  }
+
+  function buildPendingDiff(task) {
+    const ui = typeUi(task.type);
+    const prevT = task.previous_seo_title != null && task.previous_seo_title !== '' ? esc(task.previous_seo_title) : '';
+    const prevD = task.previous_seo_description != null && task.previous_seo_description !== '' ? esc(task.previous_seo_description) : '';
+    const propT = esc(task.proposed_seo_title || '');
+    const propD = esc(task.proposed_seo_description || '');
+    const notes = task.notes && String(task.notes).trim() ? esc(task.notes) : '';
+
+    if (ui.kind === 'meta') {
+      var beforeBlock =
+        prevT || prevD
+          ? (prevT
+              ? '<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 mb-1">Meta title</p><p class="text-sm text-on-surface-variant/50 line-through">' +
+                prevT +
+                '</p>'
+              : '') +
+            (prevD
+              ? '<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 mt-2 mb-1">Meta description</p><p class="text-xs text-on-surface-variant/50 line-through leading-relaxed">' +
+                prevD +
+                '</p>'
+              : '')
+          : '<p class="text-sm text-on-surface-variant/40 italic">' + esc(ui.pendingBeforeEmpty) + '</p>';
+      var afterBlock =
+        propT || propD
+          ? (propT
+              ? '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-1">Meta title</p><p class="text-sm font-semibold text-on-surface">' +
+                (propT || '—') +
+                '</p>'
+              : '') +
+            (propD
+              ? '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mt-2 mb-1">Meta description</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+                propD +
+                '</p>'
+              : '')
+          : notes
+            ? '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">Notes</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+              notes +
+              '</p>'
+            : '<p class="text-sm text-on-surface-variant/70 italic">No proposed meta copy for this task yet.</p>';
+      return { beforeBlock: beforeBlock, afterBlock: afterBlock, beforeCol: 'BEFORE', afterCol: 'AFTER' };
+    }
+
+    if (ui.kind === 'content') {
+      var afterContent =
+        notes
+          ? '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">Content recommendation</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+            notes +
+            '</p>'
+          : propT || propD
+            ? '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">Related search snippet (optional)</p>' +
+              (propT ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mb-1">Meta title</p><p class="text-sm font-semibold text-on-surface">' + propT + '</p>' : '') +
+              (propD
+                ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mt-2 mb-1">Meta description</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+                  propD +
+                  '</p>'
+                : '')
+            : '<p class="text-sm text-on-surface-variant/70 italic">No recommendation text in this task.</p>';
+      return {
+        beforeBlock: '<p class="text-sm text-on-surface-variant/40 italic">' + esc(ui.pendingBeforeEmpty) + '</p>',
+        afterBlock: afterContent,
+        beforeCol: 'CURRENT',
+        afterCol: 'RECOMMENDATION',
+      };
+    }
+
+    var seoParts = [];
+    if (notes) {
+      seoParts.push(
+        '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">Task details</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+          notes +
+          '</p>'
+      );
+    }
+    if (propT || propD) {
+      seoParts.push(
+        '<p class="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">Proposed search snippet</p>' +
+          (propT
+            ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mb-1">Meta title</p><p class="text-sm font-semibold text-on-surface">' +
+              propT +
+              '</p>'
+            : '') +
+          (propD
+            ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mt-2 mb-1">Meta description</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+              propD +
+              '</p>'
+            : '')
+      );
+    }
+    var afterSeo =
+      seoParts.length > 0
+        ? seoParts.map(function (p, i) {
+            return (i > 0 ? '<div class="mt-4"></div>' : '') + p;
+          }).join('')
+        : '<p class="text-sm text-on-surface-variant/70 italic">No details in this task yet.</p>';
+    return {
+      beforeBlock: '<p class="text-sm text-on-surface-variant/40 italic">' + esc(ui.pendingBeforeEmpty) + '</p>',
+      afterBlock: afterSeo,
+      beforeCol: 'BASELINE',
+      afterCol: 'PROPOSED',
+    };
+  }
+
+  function appliedBodyHtml(task) {
+    const ui = typeUi(task.type);
+    const prevT = task.previous_seo_title != null && task.previous_seo_title !== '' ? esc(task.previous_seo_title) : '';
+    const prevD = task.previous_seo_description != null && task.previous_seo_description !== '' ? esc(task.previous_seo_description) : '';
+    const propT = esc(task.proposed_seo_title || '');
+    const propD = esc(task.proposed_seo_description || '');
+    const notes = task.notes && String(task.notes).trim() ? esc(task.notes) : '';
+
+    if (ui.kind === 'meta') {
+      return (
+        '<div class="space-y-4">' +
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+        '<span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Meta title</span>' +
+        '<div class="flex flex-col gap-2">' +
+        (prevT
+          ? '<del class="text-xs text-on-surface-variant/60 line-through no-underline">' + prevT + '</del>'
+          : '<span class="text-xs text-on-surface-variant/50 italic">' +
+            esc('Meta title not set in Shopify Admin.') +
+            '</span>') +
+        '<ins class="flex items-start gap-2 text-sm font-semibold text-on-surface no-underline">' +
+        '<span class="material-symbols-outlined mt-0.5 text-base text-primary">arrow_forward</span>' +
+        propT +
+        '</ins></div></div>' +
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+        '<span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Meta description</span>' +
+        '<div class="flex flex-col gap-2">' +
+        (prevD
+          ? '<del class="text-xs text-on-surface-variant/60 line-through no-underline">' + prevD + '</del>'
+          : '<span class="text-xs text-on-surface-variant/50 italic">' +
+            esc('Meta description not set in Shopify Admin.') +
+            '</span>') +
+        '<ins class="flex items-start gap-2 text-sm text-on-surface-variant no-underline">' +
+        '<span class="material-symbols-outlined mt-1 text-base text-primary">arrow_forward</span>' +
+        propD +
+        '</ins></div></div></div>'
+      );
+    }
+
+    if (ui.kind === 'content') {
+      return (
+        '<div class="space-y-4">' +
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+        '<span class="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Content recommendation</span>' +
+        (notes
+          ? '<p class="text-sm text-on-surface-variant leading-relaxed">' + notes + '</p>'
+          : '<p class="text-sm text-on-surface-variant/50 italic">No notes stored for this task.</p>') +
+        '</div>' +
+        (propT || propD
+          ? '<div class="rounded-xl bg-primary/5 p-4">' +
+            '<span class="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/80">Related meta suggestion</span>' +
+            (propT
+              ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mb-1">Meta title</p><p class="text-sm font-semibold text-on-surface">' +
+                propT +
+                '</p>'
+              : '') +
+            (propD
+              ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mt-2 mb-1">Meta description</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+                propD +
+                '</p>'
+              : '') +
+            '</div>'
+          : '') +
+        '</div>'
+      );
+    }
+
+    var blocks = [];
+    if (notes) {
+      blocks.push(
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+          '<span class="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Task details</span>' +
+          '<p class="text-sm text-on-surface-variant leading-relaxed">' +
+          notes +
+          '</p></div>'
+      );
+    }
+    if (propT || propD) {
+      blocks.push(
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+          '<span class="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Proposed search snippet</span>' +
+          (propT
+            ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mb-1">Meta title</p><p class="text-sm font-semibold text-on-surface">' +
+              propT +
+              '</p>'
+            : '') +
+          (propD
+            ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60 mt-2 mb-1">Meta description</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+              propD +
+              '</p>'
+            : '') +
+          '</div>'
+      );
+    }
+    if (!blocks.length) {
+      blocks.push(
+        '<div class="rounded-xl bg-surface-container-low p-4"><p class="text-sm text-on-surface-variant/50 italic">No stored details for this task.</p></div>'
+      );
+    }
+    return '<div class="space-y-4">' + blocks.join('') + '</div>';
+  }
+
+  function dismissedMainHtml(task) {
+    const ui = typeUi(task.type);
+    const propT = esc(task.proposed_seo_title || '');
+    const propD = esc(task.proposed_seo_description || '');
+    const prevT = task.previous_seo_title != null && task.previous_seo_title !== '' ? esc(task.previous_seo_title) : '';
+    const prevD = task.previous_seo_description != null && task.previous_seo_description !== '' ? esc(task.previous_seo_description) : '';
+    const notes = task.notes && String(task.notes).trim() ? esc(task.notes) : '';
+
+    if (ui.kind === 'meta') {
+      return (
+        '<div class="mb-6 space-y-4">' +
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+        '<div class="mb-2 flex items-center gap-2">' +
+        '<span class="material-symbols-outlined text-sm text-on-surface-variant">history</span>' +
+        '<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Current meta title</span></div>' +
+        '<p class="text-sm text-on-surface">' +
+        (prevT || '—') +
+        '</p>' +
+        (prevD
+          ? '<p class="mt-3 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Current meta description</p><p class="text-sm text-on-surface leading-relaxed">' +
+            prevD +
+            '</p>'
+          : '') +
+        '</div>' +
+        '<div class="rounded-xl bg-primary/5 p-4">' +
+        '<div class="mb-2 flex items-center gap-2">' +
+        '<span class="material-symbols-outlined text-sm text-primary">auto_fix_high</span>' +
+        '<span class="text-xs font-bold uppercase tracking-widest text-primary">Proposed meta title</span></div>' +
+        '<p class="text-sm font-semibold text-primary">' +
+        (propT || '—') +
+        '</p>' +
+        (propD
+          ? '<p class="mt-3 text-xs font-bold uppercase tracking-widest text-primary">Proposed meta description</p><p class="text-sm text-on-surface-variant leading-relaxed">' +
+            propD +
+            '</p>'
+          : '') +
+        '</div></div>'
+      );
+    }
+
+    if (ui.kind === 'content') {
+      var snap =
+        prevT || prevD
+          ? (prevT ? '<p class="text-sm text-on-surface">' + prevT + '</p>' : '') +
+            (prevD ? '<p class="mt-2 text-sm text-on-surface-variant leading-relaxed">' + prevD + '</p>' : '')
+          : '<p class="text-sm text-on-surface-variant/50 italic">No meta snapshot for this content task.</p>';
+      return (
+        '<div class="mb-6 space-y-4">' +
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+        '<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Stored context</span>' +
+        '<div class="mt-2">' +
+        snap +
+        '</div></div>' +
+        '<div class="rounded-xl bg-primary/5 p-4">' +
+        '<span class="text-xs font-bold uppercase tracking-widest text-primary">Content recommendation</span>' +
+        '<p class="mt-2 text-sm text-on-surface-variant leading-relaxed">' +
+        (notes || propT || propD || '—') +
+        '</p></div></div>'
+      );
+    }
+
+    var parts = [];
+    if (prevT || prevD || notes) {
+      parts.push(
+        '<div class="rounded-xl bg-surface-container-low p-4">' +
+          '<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Task context</span>' +
+          '<div class="mt-2 space-y-2">' +
+          (notes ? '<p class="text-sm text-on-surface-variant leading-relaxed">' + notes + '</p>' : '') +
+          (prevT ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60">Previous meta title</p><p class="text-sm text-on-surface">' + prevT + '</p>' : '') +
+          (prevD ? '<p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/60">Previous meta description</p><p class="text-sm text-on-surface-variant">' + prevD + '</p>' : '') +
+          '</div></div>'
+      );
+    }
+    if (propT || propD) {
+      parts.push(
+        '<div class="rounded-xl bg-primary/5 p-4">' +
+          '<span class="text-xs font-bold uppercase tracking-widest text-primary">Proposed search snippet</span>' +
+          '<div class="mt-2 space-y-2">' +
+          (propT ? '<p class="text-xs font-bold uppercase tracking-wider text-primary/80">Meta title</p><p class="text-sm font-semibold text-primary">' + propT + '</p>' : '') +
+          (propD ? '<p class="text-xs font-bold uppercase tracking-wider text-primary/80">Meta description</p><p class="text-sm text-on-surface-variant">' + propD + '</p>' : '') +
+          '</div></div>'
+      );
+    }
+    if (!parts.length) {
+      parts.push(
+        '<div class="rounded-xl bg-surface-container-low p-4"><p class="text-sm text-on-surface-variant/50 italic">No stored details.</p></div>'
+      );
+    }
+    return '<div class="mb-6 space-y-4">' + parts.join('') + '</div>';
+  }
+
+  function fmtImpr(n) {
+    if (n == null || Number.isNaN(n)) return '—';
+    const v = Number(n);
+    return v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v));
+  }
+
+  function fmtCtr(n) {
+    if (n == null || Number.isNaN(n)) return '—';
+    return Number(n).toFixed(2) + '%';
+  }
+
+  function relDate(isoString) {
+    if (!isoString) return '';
+    const days = Math.floor((Date.now() - new Date(isoString + (isoString.length <= 10 ? 'T12:00:00' : ''))) / 86400000);
+    if (days === 0) return 'today';
+    if (days === 1) return 'yesterday';
+    return days + ' days ago';
+  }
+
+  function fmtDate(isoString) {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleDateString('en-NZ', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  function estimatedUplift(task) {
+    const impr = Number(task.impressions_at_creation) || 0;
+    const ctr = Number(task.ctr_at_creation) || 0;
+    const result = Math.round(impr * (0.02 - ctr / 100));
+    return result > 0 ? result : 0;
+  }
+
+  function pathFromUrl(url) {
+    try {
+      return new URL(url).pathname;
+    } catch {
+      return '';
+    }
+  }
+
+  function todayLocalISO() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function logErrorTasks(tasks) {
+    tasks.forEach(function (t) {
+      if (t.status === 'error') console.warn('Task in error state (hidden from dashboard):', t.id);
+    });
+  }
+
+  function partitionTasks(tasks) {
+    logErrorTasks(tasks);
+    const pending = tasks.filter(function (t) { return t.status === 'pending'; })
+      .sort(function (a, b) { return (a.priority || 0) - (b.priority || 0); });
+    const applied = tasks.filter(function (t) {
+      return t.status === 'applied' || t.status === 'rolled_back';
+    });
+    const dismissed = tasks.filter(function (t) {
+      return t.status === 'dismissed' || t.status === 'expired';
+    });
+    return { pending, applied, dismissed };
+  }
+
+  function avgCtrDeltaPp(tasks) {
+    const vals = tasks
+      .map(function (t) { return t.outcome && typeof t.outcome.ctr_delta_pp === 'number' ? t.outcome.ctr_delta_pp : null; })
+      .filter(function (v) { return v != null; });
+    if (!vals.length) return null;
+    const sum = vals.reduce(function (a, b) { return a + b; }, 0);
+    return sum / vals.length;
+  }
+
+  function clicksFrom(impr, ctrPct) {
+    const i = Number(impr) || 0;
+    const c = Number(ctrPct) || 0;
+    return Math.round(i * (c / 100));
+  }
+
+  function timingIndicator(appliedDate) {
+    if (!appliedDate) return '';
+    const days = Math.floor((Date.now() - new Date(appliedDate + 'T12:00:00')) / 86400000);
+    if (days < 14) return '⏱ Early signal (' + days + ' days) — allow 2–4 weeks for full data';
+    if (days <= 28) return '📊 Building signal (' + days + ' days)';
+    return '✓ Stable measurement (' + days + ' days)';
+  }
+
+  function metricArrow(before, after, higherIsBetter) {
+    if (after == null || before == null) return { sym: '→', cls: 'text-on-surface-variant', label: '' };
+    if (after > before) {
+      return higherIsBetter
+        ? { sym: '▲', cls: 'text-primary', label: '+' + fmtPctChange(before, after) }
+        : { sym: '▲', cls: 'text-error', label: '' };
+    }
+    if (after < before) {
+      return higherIsBetter
+        ? { sym: '▼', cls: 'text-error', label: '' }
+        : { sym: '▼', cls: 'text-primary', label: '' };
+    }
+    return { sym: '→', cls: 'text-on-surface-variant', label: 'stable' };
+  }
+
+  function fmtPctChange(before, after) {
+    const b = Number(before);
+    if (!b) return '';
+    const p = Math.round(((Number(after) - b) / b) * 100);
+    return p + '%';
+  }
+
+  function cssEsc(s) {
+    if (typeof CSS !== 'undefined' && CSS.escape) return CSS.escape(s);
+    return String(s).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+  }
+
+  async function loadTasks() {
+    const url = 'https://raw.githubusercontent.com/' + CONFIG.owner + '/' + CONFIG.repo + '/' + CONFIG.branch + '/' + CONFIG.tasksPath + '?t=' + Date.now();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch ' + res.status);
+    return res.json();
+  }
+
+  async function saveTasks(tasks) {
+    const getRes = await fetch(
+      'https://api.github.com/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/contents/' + CONFIG.tasksPath,
+      { headers: GH_HEADERS() }
+    );
+    if (!getRes.ok) {
+      const err = await getRes.text();
+      throw new Error('GET sha failed: ' + getRes.status + ' ' + err);
+    }
+    const meta = await getRes.json();
+    const sha = meta.sha;
+    const updated = JSON.stringify({ version: appData.version, tasks: tasks }, null, 2);
+    const encoded = btoa(unescape(encodeURIComponent(updated)));
+    const putRes = await fetch(
+      'https://api.github.com/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/contents/' + CONFIG.tasksPath,
+      {
+        method: 'PUT',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, GH_HEADERS()),
+        body: JSON.stringify({
+          message: 'Dashboard: update task statuses [skip ci]',
+          content: encoded,
+          sha: sha,
+          branch: CONFIG.branch,
+        }),
+      }
+    );
+    if (!putRes.ok) {
+      const err = await putRes.text();
+      throw new Error('PUT failed: ' + putRes.status + ' ' + err);
+    }
+  }
+
+  async function triggerApply() {
+    const res = await fetch(
+      'https://api.github.com/repos/' + CONFIG.owner + '/' + CONFIG.repo + '/actions/workflows/' + CONFIG.workflowId + '/dispatches',
+      {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, GH_HEADERS()),
+        body: JSON.stringify({ ref: CONFIG.branch }),
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error('Workflow trigger failed: ' + res.status + ' ' + err);
+    }
+  }
+
+  function showToast(message, kind) {
+    const host = document.getElementById('toast-host');
+    const el = document.createElement('div');
+    el.setAttribute('role', 'status');
+    el.className =
+      'pointer-events-auto max-w-sm rounded-full px-5 py-3 text-sm font-medium shadow-float ' +
+      (kind === 'error'
+        ? 'bg-error-container text-on-error-container'
+        : kind === 'success-strong'
+          ? 'bg-primary/10 text-primary'
+          : 'bg-primary/10 text-primary');
+    el.textContent = message;
+    host.appendChild(el);
+    const ms = kind === 'error' ? 5000 : kind === 'success' ? 3000 : 4000;
+    setTimeout(function () {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.3s';
+      setTimeout(function () { el.remove(); }, 350);
+    }, ms);
+  }
+
+  function updateSummary() {
+    const tasks = appData.tasks || [];
+    const { pending, applied, dismissed } = partitionTasks(tasks);
+    const appliedOnlyCount = tasks.filter(function (t) { return t.status === 'applied'; }).length;
+    document.getElementById('stat-pending').textContent = String(pending.length);
+    document.getElementById('stat-applied-count').textContent = String(appliedOnlyCount);
+
+    const withOutcome = tasks.filter(function (t) {
+      return t.status === 'applied' && t.outcome && typeof t.outcome.ctr_delta_pp === 'number';
+    });
+    const avg = avgCtrDeltaPp(withOutcome);
+    const ctrEl = document.getElementById('stat-ctr');
+    const wrap = document.getElementById('stat-ctr-wrap');
+    if (avg == null) {
+      ctrEl.textContent = '—';
+      wrap.title = 'Updated each Sunday by the pipeline';
+    } else {
+      ctrEl.textContent = '+' + avg.toFixed(2) + '%';
+      wrap.title = '';
+    }
+
+    document.getElementById('pending-badge-count').textContent = String(pending.length);
+    document.getElementById('select-all-count').textContent = String(pending.length);
+
+    const hdr = document.getElementById('applied-header-ctr');
+    if (avg == null) hdr.textContent = '—';
+    else hdr.textContent = '+' + avg.toFixed(2) + '%';
+  }
+
+  function skeletonHtml() {
+    return (
+      '<div class="animate-pulse space-y-4">' +
+      [1, 2, 3].map(function () {
+        return '<div class="h-40 rounded-xl bg-surface-container-high"></div>';
+      }).join('') +
+      '</div>'
+    );
+  }
+
+  function renderPending() {
+    const { pending } = partitionTasks(appData.tasks);
+    const list = document.getElementById('pending-list');
+    const empty = document.getElementById('pending-empty');
+    const loading = document.getElementById('pending-loading');
+    loading.classList.add('hidden');
+    loading.innerHTML = '';
+
+    if (!pending.length) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      document.getElementById('pending-select-row').classList.add('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    document.getElementById('pending-select-row').classList.remove('hidden');
+
+    list.innerHTML = pending
+      .map(function (task) {
+        const id = esc(task.id);
+        const path = esc(pathFromUrl(task.shopify_url));
+        const res = esc((task.resource || '').toLowerCase());
+        const pri = task.priority != null ? '#' + task.priority : '';
+        const uplift = estimatedUplift(task);
+        const diff = buildPendingDiff(task);
+        const showUplift = uplift > 0 && typeUi(task.type).kind === 'meta';
+        const checked = selectedIds.has(task.id) ? 'checked' : '';
+        const dismissOpen = dismissingId === task.id;
+
+        return (
+          '<div class="pending-card rounded-2xl bg-surface-container-lowest p-6 shadow-card shadow-card-hover flex flex-col gap-6 transition-colors" data-task-id="' +
+          id +
+          '">' +
+          '<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">' +
+          '<div class="flex items-start gap-4 min-w-0">' +
+          '<input type="checkbox" class="checkbox-pending mt-1 h-4 w-4 shrink-0 rounded border-outline-variant" data-select-id="' +
+          id +
+          '" ' +
+          checked +
+          ' />' +
+          '<div class="min-w-0">' +
+          '<div class="mb-1 flex flex-wrap items-center gap-2">' +
+          '<span class="rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">' +
+          res +
+          '</span>' +
+          typePillMarkup(task.type) +
+          '<span class="font-mono text-xs text-tertiary">' +
+          path +
+          '</span>' +
+          '</div>' +
+          '</div>' +
+          '</div>' +
+          '<div class="flex shrink-0 flex-row items-start justify-between gap-4 sm:flex-col sm:items-end">' +
+          (pri ? '<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">' + esc(pri) + '</span>' : '') +
+          '<div class="flex gap-6 text-right">' +
+          '<div class="flex flex-col">' +
+          '<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Impr</span>' +
+          '<span class="text-sm font-bold text-on-surface">' +
+          esc(fmtImpr(task.impressions_at_creation)) +
+          '</span></div>' +
+          '<div class="flex flex-col">' +
+          '<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">CTR</span>' +
+          '<span class="text-sm font-bold text-on-surface">' +
+          esc(fmtCtr(task.ctr_at_creation)) +
+          '</span></div></div></div></div>' +
+          '<div class="grid gap-6 rounded-xl bg-surface-container-low/50 p-4 md:grid-cols-2">' +
+          '<div class="space-y-3">' +
+          '<span class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">' +
+          esc(diff.beforeCol) +
+          '</span>' +
+          '<div class="space-y-2 rounded-xl bg-surface-container-low p-3">' +
+          diff.beforeBlock +
+          '</div></div>' +
+          '<div class="space-y-3">' +
+          '<span class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-primary/80">' +
+          esc(diff.afterCol) +
+          '</span>' +
+          '<div class="space-y-2 rounded-xl bg-primary/5 p-3">' +
+          diff.afterBlock +
+          '</div></div></div>' +
+          (showUplift
+            ? '<p class="text-sm font-medium text-tertiary">✦ Fixing this could add ~' + uplift + ' clicks/week</p>'
+            : '') +
+          '<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">' +
+          (dismissOpen
+            ? '<div class="w-full rounded-xl bg-surface-container-low p-4">' +
+              '<p class="mb-2 text-sm text-on-surface-variant">Why are you dismissing this? (optional)</p>' +
+              '<input type="text" class="borderless-input mb-4 w-full py-2 text-on-surface dismiss-reason-input" data-reason-for="' +
+              id +
+              '" placeholder="Reason…" />' +
+              '<div class="flex justify-between gap-2">' +
+              '<button type="button" class="dismiss-cancel text-sm font-bold text-on-surface-variant" data-cancel="' +
+              id +
+              '">Cancel</button>' +
+              '<button type="button" class="rounded-full bg-error-container px-5 py-2 text-sm font-bold text-on-error-container dismiss-confirm" data-confirm="' +
+              id +
+              '">Confirm Dismiss</button>' +
+              '</div></div>'
+            : '<button type="button" class="dismiss-open ml-auto text-sm text-on-surface-variant/60 hover:text-error" data-dismiss="' +
+              id +
+              '">dismiss</button>') +
+          '</div></div>'
+        );
+      })
+      .join('');
+
+    syncSelectAll();
+    updateApproveBar();
+  }
+
+  function renderApplied() {
+    const { applied } = partitionTasks(appData.tasks);
+    const list = document.getElementById('applied-list');
+    const empty = document.getElementById('applied-empty');
+    const loading = document.getElementById('applied-loading');
+    loading.classList.add('hidden');
+
+    if (!applied.length) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    list.innerHTML = applied
+      .map(function (task) {
+        const path = esc(pathFromUrl(task.shopify_url));
+        const res = esc((task.resource || '').toLowerCase());
+        const title =
+          task.proposed_seo_title && String(task.proposed_seo_title).trim()
+            ? esc(task.proposed_seo_title)
+            : esc(task.handle || task.id);
+        const appliedWhen = relDate(task.applied_date);
+        const timing = timingIndicator(task.applied_date);
+        const o = task.outcome || null;
+
+        let perfHtml = '';
+        if (!o) {
+          perfHtml =
+            '<div class="rounded-xl bg-surface-container-low py-8 text-center text-sm text-on-surface-variant">Metrics will appear after the next Sunday pipeline run.</div>';
+        } else {
+          const ctrBefore = Number(task.ctr_at_creation);
+          const ctrAfter = o.ctr_28d != null ? Number(o.ctr_28d) : null;
+          const imprBefore = Number(task.impressions_at_creation);
+          const imprAfter = o.impressions_28d != null ? Number(o.impressions_28d) : null;
+          const clicksBefore =
+            o.clicks_before != null ? Number(o.clicks_before) : clicksFrom(imprBefore, ctrBefore);
+          const clicksAfter = o.clicks_28d != null ? Number(o.clicks_28d) : o.clicks_after != null ? Number(o.clicks_after) : null;
+          const deltaPp = o.ctr_delta_pp != null ? Number(o.ctr_delta_pp) : ctrAfter != null && ctrBefore != null ? ctrAfter - ctrBefore : null;
+
+          const ctrArr = metricArrow(ctrBefore, ctrAfter, true);
+          const clkArr = metricArrow(clicksBefore, clicksAfter, true);
+
+          const ctrLine =
+            '<div class="flex flex-wrap items-center gap-2 text-sm">' +
+            '<span class="w-14 shrink-0 font-bold text-on-surface-variant">CTR</span>' +
+            '<span class="text-on-surface-variant">' +
+            fmtCtr(ctrBefore) +
+            '</span>' +
+            '<span class="text-on-surface-variant">→</span>' +
+            '<span class="font-semibold text-on-surface">' +
+            (ctrAfter != null ? fmtCtr(ctrAfter) : '—') +
+            '</span>' +
+            '<span class="' +
+            ctrArr.cls +
+            ' flex items-center gap-1">' +
+            ctrArr.sym +
+            (deltaPp != null ? ' +' + deltaPp.toFixed(2) + 'pp' : '') +
+            '</span></div>';
+
+          const clkLine =
+            '<div class="flex flex-wrap items-center gap-2 text-sm">' +
+            '<span class="w-14 shrink-0 font-bold text-on-surface-variant">Clicks</span>' +
+            '<span class="text-on-surface-variant">' +
+            clicksBefore +
+            '</span>' +
+            '<span class="text-on-surface-variant">→</span>' +
+            '<span class="font-semibold text-on-surface">' +
+            (clicksAfter != null ? clicksAfter : '—') +
+            '</span>' +
+            '<span class="' +
+            clkArr.cls +
+            ' flex items-center gap-1">' +
+            clkArr.sym +
+            (clkArr.label ? ' ' + clkArr.label : '') +
+            '</span></div>';
+
+          const imprStable =
+            imprAfter != null && imprBefore != null && Math.round(imprAfter) === Math.round(imprBefore);
+          let imprNote = '→ stable';
+          let imprNoteCls = 'text-on-surface-variant';
+          if (!imprStable && imprAfter != null && imprBefore != null) {
+            if (imprAfter > imprBefore) {
+              imprNote = '▲';
+              imprNoteCls = 'text-primary';
+            } else if (imprAfter < imprBefore) {
+              imprNote = '▼';
+              imprNoteCls = 'text-error';
+            }
+          }
+          const imprLine =
+            '<div class="flex flex-wrap items-center gap-2 text-sm">' +
+            '<span class="w-14 shrink-0 font-bold text-on-surface-variant">Impr</span>' +
+            '<span class="text-on-surface-variant">' +
+            fmtImpr(imprBefore) +
+            '</span>' +
+            '<span class="text-on-surface-variant">→</span>' +
+            '<span class="font-semibold text-on-surface">' +
+            (imprAfter != null ? fmtImpr(imprAfter) : '—') +
+            '</span>' +
+            '<span class="' +
+            imprNoteCls +
+            ' flex items-center gap-1">' +
+            imprNote +
+            '</span></div>';
+
+          perfHtml =
+            '<div class="space-y-3 rounded-xl bg-surface-container-low/80 p-4">' +
+            ctrLine +
+            clkLine +
+            imprLine +
+            '</div>';
+        }
+
+        return (
+          '<article class="rounded-2xl bg-surface-container-lowest p-6 shadow-card shadow-card-hover transition-all">' +
+          '<div class="flex flex-col gap-8 lg:flex-row">' +
+          '<div class="min-w-0 flex-1">' +
+          '<div class="mb-4 flex flex-wrap items-center gap-2">' +
+          '<span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">' +
+          res +
+          '</span>' +
+          typePillMarkup(task.type) +
+          '<span class="text-xs font-medium text-tertiary">' +
+          path +
+          '</span></div>' +
+          '<h3 class="font-headline mb-4 text-lg font-bold text-on-surface">' +
+          title +
+          '</h3>' +
+          '<p class="mb-4 text-xs text-on-surface-variant">Applied ' +
+          esc(appliedWhen) +
+          '</p>' +
+          appliedBodyHtml(task) +
+          '</div>' +
+          '<div class="flex flex-col justify-between gap-6 lg:w-80">' +
+          '<div>' +
+          '<div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">' +
+          '<h4 class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Performance Lift</h4>' +
+          '<p class="text-right text-xs italic text-on-surface-variant">' +
+          esc(timing) +
+          '</p></div>' +
+          perfHtml +
+          '</div>' +
+          '<div class="flex flex-col gap-3">' +
+          (task.shopify_url
+            ? '<a href="' +
+              esc(task.shopify_url) +
+              '" target="_blank" rel="noopener noreferrer" class="block w-full rounded-full bg-surface-container-highest py-2.5 text-center text-xs font-bold text-primary hover:bg-surface-container-high transition-colors">View Live URL →</a>'
+            : '') +
+          '<button type="button" class="rollback-btn w-full text-right text-xs text-on-surface-variant/50 hover:text-primary" data-rollback-id="' +
+          esc(task.id) +
+          '">Rollback</button>' +
+          '</div></div></div></article>'
+        );
+      })
+      .join('');
+  }
+
+  function renderDismissed() {
+    const { dismissed } = partitionTasks(appData.tasks);
+    const list = document.getElementById('dismissed-list');
+    const empty = document.getElementById('dismissed-empty');
+    const loading = document.getElementById('dismissed-loading');
+    loading.classList.add('hidden');
+
+    if (!dismissed.length) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    list.innerHTML = dismissed
+      .map(function (task) {
+        const path = esc(pathFromUrl(task.shopify_url));
+        const res = esc((task.resource || '').toLowerCase());
+        const when = relDate(task.dismissed_date);
+        const reason = esc(task.dismiss_reason || '—');
+
+        return (
+          '<div class="rounded-2xl bg-surface-container-lowest p-6 shadow-card shadow-card-hover transition-all">' +
+          '<div class="mb-6 flex items-start justify-between gap-2">' +
+          '<div>' +
+          '<div class="mb-2 flex flex-wrap items-center gap-2">' +
+          '<span class="rounded-full bg-surface-container-high px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">' +
+          res +
+          '</span>' +
+          typePillMarkup(task.type) +
+          '<span class="text-xs text-on-surface-variant/70">Dismissed ' +
+          esc(when) +
+          '</span></div>' +
+          '<h3 class="font-headline text-base font-bold text-on-surface">' +
+          path +
+          '</h3></div></div>' +
+          dismissedMainHtml(task) +
+          '<div class="mb-4 flex items-start gap-3 rounded-xl bg-error-container/30 p-4">' +
+          '<span class="material-symbols-outlined text-error">info</span>' +
+          '<div><p class="mb-1 text-xs font-bold uppercase tracking-widest text-on-error-container">Reason for Dismissal</p>' +
+          '<p class="text-sm italic text-on-error-container">' +
+          reason +
+          '</p></div></div>' +
+          '<button type="button" class="resurface-btn ml-auto block text-xs text-on-surface-variant/60 hover:text-primary" data-resurface-id="' +
+          esc(task.id) +
+          '">Re-surface</button>' +
+          '</div>'
+        );
+      })
+      .join('');
+  }
+
+  function syncSelectAll() {
+    const { pending } = partitionTasks(appData.tasks);
+    const cb = document.getElementById('select-all-pending');
+    if (!pending.length) {
+      cb.checked = false;
+      cb.indeterminate = false;
+      return;
+    }
+    const allSel = pending.every(function (t) { return selectedIds.has(t.id); });
+    const someSel = pending.some(function (t) { return selectedIds.has(t.id); });
+    cb.checked = allSel;
+    cb.indeterminate = someSel && !allSel;
+  }
+
+  function updateApproveBar() {
+    const n = selectedIds.size;
+    const show = n > 0;
+    const mobileBar = document.getElementById('approve-bar');
+    const desktopBar = document.getElementById('approve-bar-desktop');
+    document.getElementById('approve-count').textContent = String(n);
+    document.getElementById('approve-count-desktop').textContent = String(n);
+    if (show) {
+      mobileBar.classList.remove('hidden');
+      mobileBar.classList.add('flex', 'md:hidden');
+      desktopBar.classList.remove('hidden');
+      desktopBar.classList.add('flex');
+    } else {
+      mobileBar.classList.add('hidden');
+      mobileBar.classList.remove('flex', 'md:hidden');
+      desktopBar.classList.add('hidden');
+      desktopBar.classList.remove('flex');
+    }
+  }
+
+  function setTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-panel').forEach(function (el) {
+      el.classList.add('hidden');
+    });
+    document.getElementById('tab-' + tab).classList.remove('hidden');
+
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      const t = btn.getAttribute('data-tab');
+      if (t === tab) {
+        btn.className =
+          'tab-btn flex items-center gap-3 rounded-full px-4 py-2 transition-all bg-surface-container-lowest text-primary shadow-card';
+      } else {
+        btn.className =
+          'tab-btn flex items-center gap-3 rounded-full px-4 py-2 text-on-surface-variant hover:bg-surface-container-lowest/80 transition-all';
+      }
+    });
+
+    document.querySelectorAll('.mobile-tab').forEach(function (btn) {
+      const t = btn.getAttribute('data-tab');
+      if (t === tab) {
+        btn.className =
+          'mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-primary';
+      } else {
+        btn.className =
+          'mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-on-surface-variant';
+      }
+    });
+  }
+
+  function renderAll() {
+    updateSummary();
+    renderPending();
+    renderApplied();
+    renderDismissed();
+  }
+
+  async function initData() {
+    document.getElementById('fetch-error').classList.add('hidden');
+    document.getElementById('pending-loading').classList.remove('hidden');
+    document.getElementById('applied-loading').classList.remove('hidden');
+    document.getElementById('dismissed-loading').classList.remove('hidden');
+    document.getElementById('pending-loading').innerHTML = skeletonHtml();
+    document.getElementById('applied-loading').innerHTML = skeletonHtml();
+    document.getElementById('dismissed-loading').innerHTML = skeletonHtml();
+    document.getElementById('pending-list').innerHTML = '';
+    document.getElementById('applied-list').innerHTML = '';
+    document.getElementById('dismissed-list').innerHTML = '';
+
+    try {
+      const data = await loadTasks();
+      appData.version = data.version != null ? String(data.version) : '1';
+      appData.tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      document.getElementById('fetch-error').classList.add('hidden');
+    } catch (e) {
+      console.error(e);
+      document.getElementById('fetch-error').classList.remove('hidden');
+      appData.tasks = [];
+    }
+
+    document.getElementById('pending-loading').classList.add('hidden');
+    document.getElementById('applied-loading').classList.add('hidden');
+    document.getElementById('dismissed-loading').classList.add('hidden');
+    selectedIds = new Set();
+    dismissingId = null;
+    renderAll();
+    setTab(currentTab);
+  }
+
+  function bindEvents() {
+    function submitPat() {
+      const raw = document.getElementById('pat-input').value.trim();
+      const err = document.getElementById('pat-error');
+      if (!raw) {
+        err.textContent = 'Please enter a token.';
+        err.classList.remove('hidden');
+        return;
+      }
+      err.classList.add('hidden');
+      sessionStorage.setItem(PAT_KEY, raw);
+      CONFIG.pat = raw;
+      document.getElementById('pat-modal').classList.add('hidden');
+      document.getElementById('app-root').classList.remove('hidden');
+      initData();
+    }
+
+    document.getElementById('pat-continue').addEventListener('click', submitPat);
+    document.getElementById('pat-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') submitPat();
+    });
+
+    document.querySelectorAll('[data-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const t = btn.getAttribute('data-tab');
+        if (t) setTab(t);
+      });
+    });
+
+    document.getElementById('pending-list').addEventListener('change', function (e) {
+      const t = e.target;
+      if (t.matches('input[data-select-id]')) {
+        const id = t.getAttribute('data-select-id');
+        if (t.checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+        syncSelectAll();
+        updateApproveBar();
+      }
+    });
+
+    document.getElementById('select-all-pending').addEventListener('change', function (e) {
+      const { pending } = partitionTasks(appData.tasks);
+      if (e.target.checked) {
+        pending.forEach(function (t) { selectedIds.add(t.id); });
+      } else {
+        pending.forEach(function (t) { selectedIds.delete(t.id); });
+      }
+      renderPending();
+    });
+
+    document.getElementById('pending-list').addEventListener('click', function (e) {
+      const dismissOpen = e.target.closest('.dismiss-open');
+      if (dismissOpen) {
+        dismissingId = dismissOpen.getAttribute('data-dismiss');
+        renderPending();
+        return;
+      }
+      const cancel = e.target.closest('.dismiss-cancel');
+      if (cancel) {
+        dismissingId = null;
+        renderPending();
+        return;
+      }
+      const confirm = e.target.closest('.dismiss-confirm');
+      if (confirm) {
+        const id = confirm.getAttribute('data-confirm');
+        const card = document.querySelector('.pending-card[data-task-id="' + cssEsc(id) + '"]');
+        const input = card ? card.querySelector('.dismiss-reason-input') : null;
+        const reason = input ? input.value.trim() : '';
+        const task = appData.tasks.find(function (x) { return x.id === id; });
+        if (task) {
+          task.status = 'dismissed';
+          task.dismissed_date = todayLocalISO();
+          task.dismiss_reason = reason;
+        }
+        dismissingId = null;
+        saveTasks(appData.tasks)
+          .then(function () {
+            showToast('✓ Changes saved', 'success');
+            const el = document.querySelector('.pending-card[data-task-id="' + cssEsc(id) + '"]');
+            if (el) {
+              el.classList.add('card-fade-out');
+              setTimeout(function () {
+                selectedIds.delete(id);
+                renderAll();
+                setTab(currentTab);
+                updateApproveBar();
+              }, 400);
+            } else {
+              renderAll();
+            }
+          })
+          .catch(function () {
+            showToast('⚠ Could not save changes. Please try again.', 'error');
+            if (task) {
+              task.status = 'pending';
+              task.dismissed_date = null;
+              task.dismiss_reason = undefined;
+            }
+            renderPending();
+          });
+        return;
+      }
+    });
+
+    function runApprove() {
+      const snapshot = JSON.stringify(appData.tasks);
+      const ids = Array.from(selectedIds);
+      const today = todayLocalISO();
+      ids.forEach(function (id) {
+        const task = appData.tasks.find(function (x) { return x.id === id; });
+        if (task && task.status === 'pending') {
+          task.status = 'approved';
+          task.approved_date = today;
+        }
+      });
+      saveTasks(appData.tasks)
+        .then(function () {
+          return triggerApply();
+        })
+        .then(function () {
+          showToast("✓ Changes sent to Shopify. You'll receive a confirmation email shortly.", 'success-strong');
+          selectedIds.clear();
+          ids.forEach(function (id) { selectedIds.delete(id); });
+          renderAll();
+          updateApproveBar();
+        })
+        .catch(function (err) {
+          console.error(err);
+          showToast('⚠ Could not save changes. Please try again.', 'error');
+          try {
+            appData.tasks = JSON.parse(snapshot);
+          } catch (_) {}
+          renderAll();
+          updateApproveBar();
+        });
+    }
+
+    document.getElementById('btn-approve-apply').addEventListener('click', runApprove);
+    document.getElementById('btn-approve-apply-desktop').addEventListener('click', runApprove);
+
+    document.getElementById('applied-list').addEventListener('click', function (e) {
+      const rb = e.target.closest('.rollback-btn');
+      if (rb) {
+        const id = rb.getAttribute('data-rollback-id');
+        document.getElementById('rollback-cmd').textContent = 'python src/apply_changes.py --rollback ' + id;
+        document.getElementById('rollback-modal').classList.remove('hidden');
+        document.getElementById('rollback-modal').classList.add('flex');
+      }
+    });
+
+    document.getElementById('rollback-close').addEventListener('click', function () {
+      document.getElementById('rollback-modal').classList.add('hidden');
+      document.getElementById('rollback-modal').classList.remove('flex');
+    });
+
+    document.getElementById('dismissed-list').addEventListener('click', function (e) {
+      const rs = e.target.closest('.resurface-btn');
+      if (rs) {
+        const id = rs.getAttribute('data-resurface-id');
+        const task = appData.tasks.find(function (x) { return x.id === id; });
+        if (task) {
+          task.status = 'pending';
+          task.dismissed_date = null;
+          task.dismiss_reason = '';
+        }
+        saveTasks(appData.tasks)
+          .then(function () {
+            showToast('Task moved back to Pending.', 'success');
+            renderAll();
+          })
+          .catch(function () {
+            showToast('⚠ Could not save changes. Please try again.', 'error');
+            if (task) {
+              task.status = 'dismissed';
+            }
+            renderDismissed();
+          });
+      }
+    });
+  }
+
+  function boot() {
+    const stored = sessionStorage.getItem(PAT_KEY);
+    if (stored) {
+      CONFIG.pat = stored;
+      document.getElementById('pat-modal').classList.add('hidden');
+      document.getElementById('app-root').classList.remove('hidden');
+      initData();
+    }
+    bindEvents();
+  }
+
+  boot();
+})();
+  </script>
+</body>
+</html>

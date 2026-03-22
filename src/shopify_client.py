@@ -5,11 +5,12 @@ Shopify Admin GraphQL client for the Āhuru SEO apply pipeline.
 Auth model: Client ID + Client Secret → short-lived access token (Jan 2026+).
 Credentials read from environment: SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET, SHOPIFY_DOMAIN.
 
-Used exclusively by apply_changes.py — do not call from other pipeline modules.
+Used by apply_changes.py, generate_changes (via baseline_seo), and backfill_previous_seo.py.
 """
 
 import os
 import time
+from urllib.parse import urlparse
 
 import requests
 
@@ -212,34 +213,54 @@ def _article_seo_metafield_inputs(
     return inputs
 
 
-def get_article_seo(handle: str) -> dict:
+def blog_handle_from_shopify_url(url: str) -> str | None:
+    """
+    Blog handle from storefront URLs such as /blogs/guide/article-handle.
+    Returns None if the path is not under /blogs/.
+    """
+    if not url or not url.strip():
+        return None
+    parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
+    if len(parts) >= 3 and parts[0].lower() == "blogs":
+        return parts[1]
+    return None
+
+
+def _article_node_to_seo_dict(node: dict) -> dict:
+    edges = node.get("metafields", {}).get("edges", [])
+    seo_title, seo_description = _article_metafields_to_seo(edges)
+    return {
+        "id": node["id"],
+        "seo_title": seo_title,
+        "seo_description": seo_description,
+    }
+
+
+def get_article_seo(handle: str, blog_handle: str | None = None) -> dict:
     """
     Fetches current SEO fields for a blog article by handle.
-    Searches across all blogs (up to 20) and all articles (up to 100 per blog).
-    Uses exact handle matching — does not rely on fuzzy query filter.
+    Uses the root Admin `articles` connection with search query handle:... (not limited
+    to the first page of each blog). When blog_handle is set (e.g. from shopify_url),
+    the match must be in that blog; when omitted, exactly one blog must contain the handle.
     SEO values come from global metafields title_tag and description_tag.
-    Raises RuntimeError if not found.
+    Raises RuntimeError if not found or ambiguous.
     Returns {"id": "gid://shopify/Article/...", "seo_title": "...", "seo_description": "..."}.
     """
     query = """
-    query GetBlogsAndArticles {
-      blogs(first: 20) {
+    query FindArticleSEO($articleQuery: String!) {
+      articles(first: 20, query: $articleQuery) {
         edges {
           node {
+            id
             handle
-            articles(first: 100) {
+            blog {
+              handle
+            }
+            metafields(first: 20, namespace: "global") {
               edges {
                 node {
-                  id
-                  handle
-                  metafields(first: 20, namespace: "global") {
-                    edges {
-                      node {
-                        key
-                        value
-                      }
-                    }
-                  }
+                  key
+                  value
                 }
               }
             }
@@ -248,26 +269,38 @@ def get_article_seo(handle: str) -> dict:
       }
     }
     """
-    data = _graphql(query)
-    blogs = data.get("blogs", {}).get("edges", [])
+    data = _graphql(query, {"articleQuery": f"handle:{handle}"})
+    article_edges = data.get("articles", {}).get("edges", [])
 
-    for blog_edge in blogs:
-        articles = blog_edge["node"].get("articles", {}).get("edges", [])
-        for article_edge in articles:
-            node = article_edge["node"]
-            if node["handle"] == handle:
-                edges = node.get("metafields", {}).get("edges", [])
-                seo_title, seo_description = _article_metafields_to_seo(edges)
-                return {
-                    "id": node["id"],
-                    "seo_title": seo_title,
-                    "seo_description": seo_description,
-                }
+    candidates: list[tuple[str | None, dict]] = []
+    for article_edge in article_edges:
+        node = article_edge["node"]
+        if node.get("handle") != handle:
+            continue
+        blog_h = (node.get("blog") or {}).get("handle")
+        candidates.append((blog_h, node))
 
-    raise RuntimeError(
-        f"Article not found for handle: {handle!r} "
-        f"(searched {len(blogs)} blogs)"
-    )
+    if not candidates:
+        raise RuntimeError(
+            f"Article not found for handle: {handle!r} (articles search returned no exact match)"
+        )
+
+    if blog_handle is not None:
+        for bh, node in candidates:
+            if bh == blog_handle:
+                return _article_node_to_seo_dict(node)
+        raise RuntimeError(
+            f"Article {handle!r} not found in blog {blog_handle!r} "
+            f"(found in: {[c[0] for c in candidates]})"
+        )
+
+    if len(candidates) > 1:
+        raise RuntimeError(
+            f"Ambiguous article handle {handle!r} in blogs {[c[0] for c in candidates]} — "
+            "set shopify_url or pass blog_handle"
+        )
+
+    return _article_node_to_seo_dict(candidates[0][1])
 
 
 def update_article_seo(article_id: str, seo_title: str, seo_description: str) -> dict:
@@ -305,12 +338,12 @@ def update_article_seo(article_id: str, seo_title: str, seo_description: str) ->
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 
-def get_seo(resource: str, handle: str) -> dict:
+def get_seo(resource: str, handle: str, blog_handle: str | None = None) -> dict:
     """Routes to get_product_seo or get_article_seo based on resource type."""
     if resource == "product":
         return get_product_seo(handle)
     elif resource == "article":
-        return get_article_seo(handle)
+        return get_article_seo(handle, blog_handle=blog_handle)
     else:
         raise ValueError(f"Unknown resource type: {resource!r}. Expected 'product' or 'article'.")
 

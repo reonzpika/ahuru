@@ -27,7 +27,7 @@ load_dotenv()
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from shopify_client import get_seo, update_seo
+from shopify_client import blog_handle_from_shopify_url, get_seo, update_seo
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
@@ -154,7 +154,12 @@ def apply_all(dry_run: bool = False) -> list:
         try:
             # Fetch live current values
             print(f"  Fetching live SEO from Shopify...")
-            live = get_seo(resource, handle)
+            blog_h = (
+                blog_handle_from_shopify_url(task.get("shopify_url") or "")
+                if resource == "article"
+                else None
+            )
+            live = get_seo(resource, handle, blog_handle=blog_h)
             print(f"  Live title: {live['seo_title']!r}")
 
             audit["previous_seo_title"] = live["seo_title"]
@@ -284,7 +289,12 @@ def rollback_task(task_id: str, dry_run: bool = False) -> None:
 
     print(f"\nSTEP 2: Fetching live values for audit")
     print(DIVIDER)
-    live = get_seo(resource, handle)
+    blog_h = (
+        blog_handle_from_shopify_url(task.get("shopify_url") or "")
+        if resource == "article"
+        else None
+    )
+    live = get_seo(resource, handle, blog_handle=blog_h)
     print(f"  Current live title: {live['seo_title']!r}")
     print(f"  Rollback to:        {prev_title!r}")
 

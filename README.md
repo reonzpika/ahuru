@@ -136,6 +136,9 @@ The full contents of your `service_account.json` file (the entire JSON as a stri
 **`ANTHROPIC_API_KEY`**
 Your Anthropic API key from [console.anthropic.com](https://console.anthropic.com).
 
+**Shopify baseline SEO (optional but recommended)**  
+The same three secrets as the Apply SEO Changes workflow (`SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `SHOPIFY_DOMAIN`) let the weekly run populate `previous_seo_*` on new `meta_update` tasks. If they are omitted, task generation still works; baseline fields stay empty until you run apply or [`src/backfill_previous_seo.py`](src/backfill_previous_seo.py). Set `SEO_SKIP_BASELINE_FETCH=1` to disable baseline fetches even when credentials exist.
+
 ### 2.2 Verify Your GSC Property URL
 
 Open `src/gsc_fetch.py` and confirm `SITE_URL` matches your GSC property exactly.

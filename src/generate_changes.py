@@ -3,6 +3,10 @@ generate_changes.py
 Extracts actionable SEO changes from the weekly report and GSC analysis.
 Writes tasks to seo_tasks.json (central registry) and pending/YYYY-MM-DD-changes.json.
 No Claude API — copy is parsed from the report's CTR Opportunities section.
+
+Baseline SEO (previous_seo_* on meta_update): optional. When enabled and SHOPIFY_* are set,
+live titles/descriptions are read via baseline_seo + shopify_client (same as apply).
+Disable with fetch_baseline_seo=False or env SEO_SKIP_BASELINE_FETCH=1.
 """
 
 import json
@@ -10,6 +14,11 @@ import os
 import re
 from datetime import date, timedelta
 from urllib.parse import urlparse
+
+from baseline_seo import fetch_previous_seo_for_task, resolve_fetch_baseline_seo
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -204,8 +213,9 @@ def _make_task(
 ) -> dict:
     """
     Build one task dict with full schema. report_date is the pipeline run date.
-    previous_seo_title / previous_seo_description are None (unknown) at creation;
-    Phase 3 (apply_changes.py) will fetch live values from Shopify before writing.
+    For meta_update, previous_seo_* are usually filled from Shopify immediately after
+    creation (see generate_changes). If fetch is skipped or fails, they stay None.
+    apply_changes.py still reads live Shopify at apply time for safety.
     """
     created = report_date
     exp = (date.fromisoformat(created) + timedelta(days=EXPIRY_DAYS)).isoformat()
@@ -243,14 +253,23 @@ def generate_changes(
     report_text: str,
     page_query_90d: list | None = None,
     report_date: str | None = None,
+    *,
+    fetch_baseline_seo: bool | None = None,
 ) -> int:
     """
     Sweep expired tasks, build new tasks from analysis + report copy, append to
     seo_tasks.json and write pending/YYYY-MM-DD-changes.json.
     Returns number of new tasks created.
+
+    fetch_baseline_seo: when True (default), fill previous_seo_* for new meta_update
+    tasks from Shopify when credentials exist. When False, skip. When None, use env
+    SEO_SKIP_BASELINE_FETCH (set to 1/true/yes to skip).
     """
     page_query_90d = page_query_90d or []
     report_date = report_date or date.today().isoformat()
+    do_baseline = resolve_fetch_baseline_seo(fetch_baseline_seo)
+    if not do_baseline:
+        print("Note: Baseline SEO fetch disabled (fetch_baseline_seo=False or SEO_SKIP_BASELINE_FETCH set)")
 
     # ── Step 1: Sweep expired ─────────────────────────────────────────────────
     loaded = _load_seo_tasks()
@@ -280,6 +299,7 @@ def generate_changes(
 
     # ── Step 4 & 5: Build new tasks ──────────────────────────────────────────
     new_tasks = []
+    baseline_cache: dict[tuple[str, str, str], tuple[str, str]] = {}
     seen_this_run: set[str] = set()  # deduplicates within this run
     skipped_active = 0
     skipped_no_copy = 0
@@ -335,6 +355,8 @@ def generate_changes(
         # Normalise shopify_url if we only had path
         if not task["shopify_url"].startswith("http"):
             task["shopify_url"] = BASE_URL + ("/" + page.lstrip("/") if page.startswith("/") else f"/{resource}s/{handle}")
+        if do_baseline:
+            fetch_previous_seo_for_task(task, baseline_cache)
         seen_this_run.add(task_id)
         new_tasks.append(task)
 
