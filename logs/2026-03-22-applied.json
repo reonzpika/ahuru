@@ -154,5 +154,29 @@
     "new_seo_title": "Meri Kirihimete — NZ Christmas Card | Āhuru",
     "new_seo_description": "Say Meri Kirihimete with a beautiful NZ-made Christmas card from Āhuru. Perfect for gifting with a candle or wellness bundle. Free NZ shipping available.",
     "result": "applied"
+  },
+  {
+    "task_id": "meta_update__scented-tea-light-candles",
+    "resource": "article",
+    "handle": "scented-tea-light-candles",
+    "applied_at": "2026-03-22T04:22:58Z",
+    "dry_run": false,
+    "previous_seo_title": "",
+    "previous_seo_description": "",
+    "new_seo_title": "Scented Tea Light Candles NZ — Pure Essential Oils | Āhuru",
+    "new_seo_description": "Discover NZ-made scented tea light candles with pure essential oils — no synthetic fragrance. Lavender, peppermint, cedarwood & more. Shop Āhuru online.",
+    "result": "applied"
+  },
+  {
+    "task_id": "meta_update__oil-diffuser-for-gamer-relaxation",
+    "resource": "article",
+    "handle": "oil-diffuser-for-gamer-relaxation",
+    "applied_at": "2026-03-22T04:22:59Z",
+    "dry_run": false,
+    "previous_seo_title": "",
+    "previous_seo_description": "",
+    "new_seo_title": "Best Oil Diffuser for Gamers — Relaxation & Focus | Āhuru",
+    "new_seo_description": "Help a gamer unwind with an aromatherapy oil diffuser. Essential oils for focus, stress relief & better sleep. NZ-made blends, fast NZ shipping.",
+    "result": "applied"
   }
 ]
