@@ -1366,7 +1366,22 @@
     return null;
   }
 
-  /** First "# … Report — DATE" line in Markdown body */
+  var MONTH_NAME_TO_INDEX = {
+    january: 0,
+    february: 1,
+    march: 2,
+    april: 3,
+    may: 4,
+    june: 5,
+    july: 6,
+    august: 7,
+    september: 8,
+    october: 9,
+    november: 10,
+    december: 11,
+  };
+
+  /** First weekly "# … Report — 29 March 2026" style line (day-level). */
   function parseReportHeadingDate(md) {
     var lines = String(md || '').split(/\r?\n/);
     for (var i = 0; i < Math.min(lines.length, 20); i++) {
@@ -1377,6 +1392,30 @@
       }
     }
     return null;
+  }
+
+  /** Monthly report: "# Āhuru SEO Monthly Report — March 2026" → month start UTC. */
+  function parseMonthlyReportHeadingPeriod(md) {
+    var lines = String(md || '').split(/\r?\n/);
+    for (var i = 0; i < Math.min(lines.length, 25); i++) {
+      var m = lines[i].match(/Monthly\s+Report\s*[—–-]\s*([A-Za-z]+)\s+(\d{4})/);
+      if (m) {
+        var mi = MONTH_NAME_TO_INDEX[m[1].toLowerCase()];
+        if (mi !== undefined) {
+          return Date.UTC(parseInt(m[2], 10), mi, 1);
+        }
+      }
+    }
+    return null;
+  }
+
+  /** Compare latest.md body to archive filename: same units as parseDatedMarkdownFilename. */
+  function parseReportPeriodFromLatestBody(md, monthly) {
+    if (monthly) {
+      var monthStart = parseMonthlyReportHeadingPeriod(md);
+      if (monthStart != null) return monthStart;
+    }
+    return parseReportHeadingDate(md);
   }
 
   function selectArchiveOption(value) {
@@ -1411,7 +1450,7 @@
             }
           } else if (res.ok) {
             const mdLatest = await res.text();
-            const tLatest = parseReportHeadingDate(mdLatest);
+            const tLatest = parseReportPeriodFromLatestBody(mdLatest, reportKind === 'monthly');
             const tNewest = parseDatedMarkdownFilename(newest);
             const indexNewer = tNewest != null && (tLatest == null || tNewest > tLatest);
             if (indexNewer) {
