@@ -1356,6 +1356,38 @@
     return res.json();
   }
 
+  /** ISO-like filename from archive index: YYYY-MM-DD.md or YYYY-MM.md */
+  function parseDatedMarkdownFilename(name) {
+    if (!name || typeof name !== 'string') return null;
+    var w = name.match(/^(\d{4})-(\d{2})-(\d{2})\.md$/i);
+    if (w) return Date.UTC(parseInt(w[1], 10), parseInt(w[2], 10) - 1, parseInt(w[3], 10));
+    var mo = name.match(/^(\d{4})-(\d{2})\.md$/i);
+    if (mo) return Date.UTC(parseInt(mo[1], 10), parseInt(mo[2], 10) - 1, 1);
+    return null;
+  }
+
+  /** First "# … Report — DATE" line in Markdown body */
+  function parseReportHeadingDate(md) {
+    var lines = String(md || '').split(/\r?\n/);
+    for (var i = 0; i < Math.min(lines.length, 20); i++) {
+      var m = lines[i].match(/Report\s*[—–-]\s*(.+)$/);
+      if (m) {
+        var t = Date.parse(m[1].trim());
+        if (!isNaN(t)) return t;
+      }
+    }
+    return null;
+  }
+
+  function selectArchiveOption(value) {
+    var sel = document.getElementById('report-archive-select');
+    if (!sel) return;
+    var opt = Array.prototype.find.call(sel.options, function (o) {
+      return o.value === value;
+    });
+    if (opt) sel.value = value;
+  }
+
   async function fetchAndRenderReport(filename) {
     const loading = document.getElementById('report-loading');
     const errEl = document.getElementById('report-error');
@@ -1365,25 +1397,59 @@
     body.innerHTML = '';
     try {
       let res = await fetch(reportFileUrl(filename));
-      // If latest.md is missing but dated archives exist, load newest from index
-      if (!res.ok && res.status === 404 && filename === 'latest.md') {
+      let md = null;
+
+      if (filename === 'latest.md') {
+        const idx = await loadArchiveIndex();
+        const newest = idx && idx.newest;
+        if (newest && newest !== 'latest.md') {
+          if (!res.ok && res.status === 404) {
+            res = await fetch(reportFileUrl(newest));
+            if (res.ok) {
+              md = await res.text();
+              selectArchiveOption(newest);
+            }
+          } else if (res.ok) {
+            const mdLatest = await res.text();
+            const tLatest = parseReportHeadingDate(mdLatest);
+            const tNewest = parseDatedMarkdownFilename(newest);
+            const indexNewer = tNewest != null && (tLatest == null || tNewest > tLatest);
+            if (indexNewer) {
+              const resNew = await fetch(reportFileUrl(newest));
+              if (resNew.ok) {
+                md = await resNew.text();
+                res = resNew;
+                selectArchiveOption(newest);
+              } else {
+                md = mdLatest;
+              }
+            } else {
+              md = mdLatest;
+            }
+          }
+        }
+      }
+
+      if (md === null && res.ok) {
+        md = await res.text();
+      }
+
+      if (md === null && !res.ok && filename === 'latest.md') {
         const idxRes = await fetch(reportFileUrl('archive-index.json'));
         if (idxRes.ok) {
           const idx = await idxRes.json();
           const newest = idx && idx.newest;
           if (newest && newest !== 'latest.md') {
             res = await fetch(reportFileUrl(newest));
-            const sel = document.getElementById('report-archive-select');
-            if (sel) {
-              const opt = Array.prototype.find.call(sel.options, function (o) {
-                return o.value === newest;
-              });
-              if (opt) sel.value = newest;
+            if (res.ok) {
+              md = await res.text();
+              selectArchiveOption(newest);
             }
           }
         }
       }
-      if (!res.ok) {
+
+      if (!res.ok && md === null) {
         const hint =
           res.status === 404
             ? reportKind === 'monthly'
@@ -1392,7 +1458,6 @@
             : 'HTTP ' + res.status;
         throw new Error(hint);
       }
-      const md = await res.text();
       if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
         body.innerHTML = marked.parse(md, { mangle: false, headerIds: false });
       } else {
