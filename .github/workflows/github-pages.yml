@@ -1,11 +1,24 @@
 # Publishes dashboard.html to GitHub Pages.
 # One-time: repo Settings → Pages → Build and deployment → Source: GitHub Actions
+#
+# Pushes made with GITHUB_TOKEN (e.g. weekly/monthly report or apply-changes bots) do not
+# trigger new workflows via the push event. workflow_run runs after those workflows finish
+# so this deploy still runs when main is updated by automation.
 name: Deploy GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Weekly SEO Report
+      - Monthly SEO Report
+      - Apply SEO Changes
+    types:
+      - completed
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -18,12 +31,15 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Prepare static bundle
         run: |
