@@ -54,6 +54,8 @@ Steps: fetch GSC → [`analyse.py`](src/analyse.py) → [`report.py`](src/report
 
 Raw GSC JSON for debugging is written to [`data/`](data/) (gitignored).
 
+**Weekly report metrics (90d vs 7d):** The pipeline fetches both windows from Search Console. **Week-on-Week Performance** and site-wide WoW percentages use **7-day** totals (current vs previous). **CTR opportunities**, **quick wins**, **cannibalisation**, **top pages/queries**, and per-task **impressions/CTR at creation** use **~90 days** of data so snippets and positions are stable week to week. Exact date ranges for each run are in the saved GSC JSON and in the analysis payload as `date_ranges`; figures typically lag **about 3 days** behind “today” ([`DATA_LAG_DAYS`](src/gsc_fetch.py) in `gsc_fetch.py`).
+
 ### Monthly run details
 
 Steps: [`gsc_fetch_monthly.py`](src/gsc_fetch_monthly.py) (28d MoM + 90d YoY windows) → [`analyse_monthly.py`](src/analyse_monthly.py) → [`report_monthly.py`](src/report_monthly.py) → [`reports/monthly/`](reports/monthly/) → optional Resend **highlights** email (same pattern as weekly; full Markdown on the dashboard under **Monthly**).

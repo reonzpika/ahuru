@@ -43,7 +43,16 @@ def build_user_message(analysis):
 
 Report date: {report_date}
 
-## GSC Analysis Data
+## GSC analysis data (JSON)
+
+Rows under `ctr_opportunities`, `top_pages_90d`, and each cannibalisation issue's `competing_pages` may include `shopify_live_title` and `shopify_live_description` when the pipeline could read the live Shopify store for that URL. Treat those as **current** meta. Use them in the CTR section when present; reference them in the Top 10 Pages table or split-traffic section when useful. If those keys are missing for a URL, say you are inferring from the URL and query context only.
+
+**Time windows in this JSON (do not mix without labelling):**
+
+- **~90 days** (`date_ranges["90d"]` for exact start/end): `ctr_opportunities`, `quick_wins`, `cannibalisation`, `top_pages_90d`, `top_queries_90d`; in `summary`: `ranked_pages_90d`, `total_clicks_90d`, `total_impressions_90d`.
+- **This 7 days vs previous 7 days** (`date_ranges.current_7d`, `date_ranges.previous_7d`): `summary` fields `current_7d_*`, `previous_7d_*`, WoW percentages; `week_over_week` (per-page Dropping / Rising).
+
+Use `metric_windows` in the JSON for the same mapping in one place. When helpful, quote `date_ranges` once in Summary or Week-on-Week so Ting sees the exact GSC dates. Never compare a 90-day page or query total to a 7-day site total in one sentence unless both windows are explicitly named.
 
 ```json
 {json.dumps(analysis, indent=2)}

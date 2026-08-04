@@ -26,6 +26,21 @@ MIN_IMPRESSIONS_WOW = 10           # Min impressions in previous period to compa
 MIN_IMPRESSIONS_CANNIBALISATION = 10   # Per page, per query, to count
 MIN_TOTAL_CANNIBALISATION = 30         # Total query impressions to surface issue
 
+# Shipped with analysis JSON so the report model never confuses GSC windows.
+METRIC_WINDOWS = {
+    "summary": (
+        "Mixed: 90d totals (ranked_pages_90d, total_clicks_90d, total_impressions_90d) "
+        "and 7d week-on-week (current_7d_*, previous_7d_*, clicks_wow_pct, impressions_wow_pct)."
+    ),
+    "ctr_opportunities": "90d page aggregates; same window as date_ranges['90d'].",
+    "quick_wins": "90d query aggregates; same window as date_ranges['90d'].",
+    "week_over_week": "Per page: current 7d vs previous 7d impressions (see date_ranges).",
+    "cannibalisation": "90d page+query; same window as date_ranges['90d'].",
+    "top_pages_90d": "90d; same window as date_ranges['90d'].",
+    "top_queries_90d": "90d; same window as date_ranges['90d'].",
+    "date_ranges": "Exact GSC start and end dates for each window (90d, current_7d, previous_7d, 28d).",
+}
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -270,6 +285,7 @@ def analyse(data):
     print("Running analysis...")
 
     result = {
+        "metric_windows": METRIC_WINDOWS,
         "summary": site_summary(
             data["pages_90d"],
             data["current_7d"],

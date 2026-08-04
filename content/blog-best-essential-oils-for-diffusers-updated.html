@@ -1,0 +1,926 @@
+<!--
+  Paste-ready blog body for Shopify (Guide: best essential oils for diffusers).
+  Stitch-inspired layout; Āhuru palette only; FAQPage JSON-LD at end.
+  PREVIEW: Judge.me, cart add, strip/collection links, FAQ accordions, mobile grids.
+-->
+<style>
+  .ahuru-lp {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 18px 60px;
+    color: #2f2a26;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .ahuru-lp h1,
+  .ahuru-lp h2,
+  .ahuru-lp h3,
+  .ahuru-lp h4 {
+    color: #2a241f;
+    line-height: 1.2;
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+  .ahuru-lp h1 { font-size: clamp(30px, 4vw, 42px); letter-spacing: -0.02em; }
+  .ahuru-lp h2 { font-size: clamp(24px, 3vw, 30px); margin-top: 0; }
+  .ahuru-lp h3 { font-size: 1.15rem; margin-top: 0; }
+  .ahuru-lp p { margin: 0 0 16px; color: #5a524b; }
+  .ahuru-lp a { color: #2a241f; }
+  .ahuru-lp img { max-width: 100%; display: block; }
+  .ahuru-lp ul { margin: 0 0 16px; padding-left: 1.25rem; color: #5a524b; }
+  .ahuru-lp li { margin-bottom: 6px; }
+
+  .ahuru-section { padding: 48px 0; }
+  .ahuru-section--tight { padding: 32px 0; }
+
+  .ahuru-kicker {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #8b7f73;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .ahuru-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+    align-items: center;
+    background: #f8f5f1;
+    border-radius: 22px;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding: 0;
+  }
+  .ahuru-hero-copy { padding: 40px 36px 48px; }
+  .ahuru-hero-copy .ahuru-lead {
+    font-size: 18px;
+    color: #4d443c;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .ahuru-hero-media {
+    min-height: 360px;
+    position: relative;
+  }
+  .ahuru-hero-media img {
+    width: 100%;
+    height: 100%;
+    min-height: 360px;
+    object-fit: cover;
+  }
+
+  .ahuru-btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+  .ahuru-btn {
+    display: inline-block;
+    padding: 14px 22px;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .ahuru-btn:hover { opacity: 0.92; }
+  .ahuru-btn-primary { background: #2a241f; color: #fff !important; }
+  .ahuru-btn-secondary {
+    background: #ece6df;
+    color: #2a241f !important;
+    border: 2px solid #2a241f;
+  }
+
+  .ahuru-strip-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin: 0;
+  }
+  .ahuru-strip-card {
+    position: relative;
+    display: block;
+    border-radius: 18px;
+    overflow: hidden;
+    min-height: 160px;
+    text-decoration: none;
+    color: #fff !important;
+  }
+  .ahuru-strip-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+  .ahuru-strip-card:hover img { transform: scale(1.04); }
+  .ahuru-strip-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(42,36,31,0.82) 0%, rgba(42,36,31,0.35) 100%);
+  }
+  .ahuru-strip-card__body {
+    position: relative;
+    z-index: 1;
+    padding: 28px 24px;
+    max-width: 90%;
+  }
+  .ahuru-strip-card__title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0;
+    color: #fff;
+  }
+
+  .ahuru-collections-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+  .ahuru-col-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .ahuru-col-card__media {
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background: #f8f5f1;
+    box-shadow: 0 8px 24px rgba(42,36,31,0.08);
+  }
+  .ahuru-col-card__media img { width: 100%; height: 100%; object-fit: cover; }
+  .ahuru-col-card__meta h2 { font-size: 1.35rem; margin-bottom: 10px; }
+  .ahuru-col-card__label { font-size: 15px; color: #7f6f61; margin-bottom: 8px; }
+  .ahuru-col-card__meta p { font-size: 14px; margin-bottom: 14px; }
+
+  .ahuru-qp-head { text-align: center; max-width: 640px; margin: 0 auto 36px; }
+  .ahuru-qp-head p { color: #665d56; }
+
+  .ahuru-quick-picks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .ahuru-pick {
+    border: 1px solid #eee4da;
+    background: #fbf9f6;
+    border-radius: 18px;
+    padding: 22px 18px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .ahuru-pick:hover {
+    box-shadow: 0 12px 32px rgba(42,36,31,0.1);
+    transform: translateY(-2px);
+  }
+  .ahuru-pick__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #ece6df;
+    color: #2a241f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+  .ahuru-pick h3 { font-size: 1.05rem; margin-bottom: 8px; }
+  .ahuru-pick__tags {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b5f54;
+    margin-bottom: 10px;
+  }
+  .ahuru-pick p { font-size: 14px; flex: 1; margin-bottom: 16px; }
+  .ahuru-pick .ahuru-btn {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .ahuru-band-dark {
+    background: #2a241f;
+    color: #e8e4df;
+    border-radius: 20px;
+    padding: 48px 36px;
+    margin: 0;
+  }
+  .ahuru-band-dark h2 {
+    color: #fff;
+    border-left: 4px solid #c4b8a8;
+    padding-left: 18px;
+    margin-bottom: 22px;
+  }
+  .ahuru-band-dark p,
+  .ahuru-band-dark li { color: #d4cfc7; }
+  .ahuru-band-dark ul { color: #d4cfc7; }
+
+  .ahuru-products-head { margin-bottom: 28px; max-width: 56rem; }
+  .ahuru-products {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .ahuru-card {
+    border: 1px solid #eee6de;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: box-shadow 0.25s ease;
+  }
+  .ahuru-card:hover { box-shadow: 0 10px 28px rgba(42,36,31,0.08); }
+  .ahuru-card-image {
+    background: #f8f5f1;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  .ahuru-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .ahuru-card:hover .ahuru-card-image img { transform: scale(1.05); }
+  .ahuru-card-body { padding: 16px 16px 18px; display: flex; flex-direction: column; flex: 1; }
+  .ahuru-card-body h4 { font-size: 16px; margin-bottom: 8px; }
+  .ahuru-price { font-size: 14px; color: #7f6f61; margin-bottom: 8px; }
+  .ahuru-card-body p { font-size: 13px; margin-bottom: 12px; flex: 1; }
+  .ahuru-jdgm-wrap { min-height: 22px; margin-bottom: 6px; }
+  .ahuru-card-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: auto; }
+  .ahuru-add-form { margin: 0; display: inline-block; }
+  .ahuru-add-form button {
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
+  .ahuru-card .ahuru-btn { padding: 10px 14px; font-size: 13px; border-radius: 10px; }
+
+  .ahuru-guide-band {
+    background: #f4efe9;
+    border-radius: 20px;
+    padding: 40px 28px;
+    margin: 0;
+  }
+  .ahuru-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 8px; }
+  .ahuru-mini-card {
+    background: #fff;
+    border: 1px solid #eee6de;
+    border-radius: 16px;
+    padding: 24px 22px;
+    box-shadow: 0 4px 16px rgba(42,36,31,0.04);
+  }
+  .ahuru-mini-card h3 { font-size: 1.1rem; margin-bottom: 12px; }
+  .ahuru-find-scent { text-align: center; max-width: 640px; margin: 0 auto; padding: 20px 0 8px; }
+  .ahuru-find-scent .ahuru-btn-row { justify-content: center; }
+
+  .ahuru-cta-banner {
+    margin: 36px auto 0;
+    max-width: 900px;
+    background: #2a241f;
+    border-radius: 22px;
+    padding: 40px 28px;
+    text-align: center;
+    color: #e8e4df;
+  }
+  .ahuru-cta-banner h3 { color: #fff; font-size: clamp(22px, 3vw, 28px); margin-bottom: 14px; }
+  .ahuru-cta-banner p { color: #d4cfc7; max-width: 560px; margin: 0 auto 22px; }
+  .ahuru-cta-banner .ahuru-btn-primary { background: #fff; color: #2a241f !important; }
+  .ahuru-cta-banner .ahuru-btn-secondary {
+    background: transparent;
+    color: #fff !important;
+    border-color: #fff;
+  }
+
+  .ahuru-conclusion { padding: 40px 0; max-width: 720px; margin: 0 auto; text-align: center; }
+
+  .ahuru-faq-wrap { max-width: 720px; margin: 0 auto; padding: 20px 0 0; }
+  .ahuru-faq-wrap > h2 { text-align: center; margin-bottom: 28px; }
+  .ahuru-details {
+    border: 1px solid #e5ddd4;
+    border-radius: 14px;
+    background: #fbf9f6;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .ahuru-details summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #2a241f;
+    list-style: none;
+  }
+  .ahuru-details summary::-webkit-details-marker { display: none; }
+  .ahuru-details__chev {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #ece6df;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+  }
+  .ahuru-details[open] .ahuru-details__chev { transform: rotate(180deg); }
+  .ahuru-details__body {
+    padding: 0 20px 18px;
+    color: #5a524b;
+    font-size: 14px;
+  }
+  .ahuru-details__body p { margin: 0; }
+
+  @media (max-width: 900px) {
+    .ahuru-hero { grid-template-columns: 1fr; }
+    .ahuru-hero-media { order: -1; min-height: 280px; }
+    .ahuru-hero-media img { min-height: 280px; }
+    .ahuru-collections-row { grid-template-columns: 1fr; }
+    .ahuru-two-col { grid-template-columns: 1fr; }
+    .ahuru-quick-picks { grid-template-columns: repeat(2, 1fr); }
+    .ahuru-strip-cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .ahuru-quick-picks { grid-template-columns: 1fr; }
+    .ahuru-products { grid-template-columns: 1fr; }
+    .ahuru-hero-copy { padding: 28px 20px 36px; }
+  }
+</style>
+<div class="ahuru-lp">
+<section class="ahuru-section ahuru-section--tight">
+<div class="ahuru-hero">
+<div class="ahuru-hero-copy">
+<div class="ahuru-kicker">Pure diffuser oils • NZ</div>
+<h1>Best Essential Oils for Diffusers</h1>
+<p class="ahuru-lead">Find the right scent for sleep, focus, stress relief, or a fresher home - in minutes</p>
+<p dir="ltr"><span>Not all essential oils create the same feeling.</span></p>
+<p dir="ltr"><span>Some help you unwind after a long day. Some sharpen your focus. Others simply make your home feel clean, calm, and inviting.</span></p>
+<p dir="ltr"><span>This guide is designed differently.</span></p>
+<p dir="ltr"><span>Instead of overwhelming you with information, we help you:</span></p>
+<ul>
+<li>Choose your mood and / or aromatherapy benefits you are after</li>
+<li>Pick the right oil</li>
+<li>Start diffusing immediately</li>
+</ul>
+<p dir="ltr"><span>Then - if it feels right - you can shop directly from this page.</span></p>
+<div class="ahuru-btn-row">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oils-for-diffuser">Shop diffuser oils</a>
+<a class="ahuru-btn ahuru-btn-secondary" href="https://www.ahurucandles.co.nz/collections/essential-oil-diffuser-nz">Shop diffusers</a>
+</div>
+</div>
+<div class="ahuru-hero-media">
+<img alt="" src="https://cdn.shopify.com/s/files/1/0460/4851/0114/files/beautiful-flowers-3084952_1920.jpg?v=1707188143">
+</div>
+</div>
+</section>
+
+<section class="ahuru-section ahuru-section--tight">
+<div class="ahuru-strip-cards">
+<a class="ahuru-strip-card" href="https://www.ahurucandles.co.nz/collections/aromatherapy-nz">
+<img alt="" src="https://cdn.shopify.com/s/files/1/0460/4851/0114/collections/christin-hume-0MoF-Fe0w0A-unsplash.jpg?v=1674099857">
+<div class="ahuru-strip-card__body">
+<p class="ahuru-strip-card__title">Shop Self-Care Best Sellers</p>
+</div>
+</a>
+<a class="ahuru-strip-card" href="https://www.ahurucandles.co.nz/collections/essential-oil-candles-nz">
+<img alt="" src="https://cdn.shopify.com/s/files/1/0460/4851/0114/collections/20bc76d0f6ef3e4438eb86f4f31bfa71.jpg?v=1688820605">
+<div class="ahuru-strip-card__body">
+<p class="ahuru-strip-card__title">Pure Essential Oil Candles</p>
+</div>
+</a>
+</div>
+</section>
+
+<section class="ahuru-section ahuru-section--tight">
+<div class="ahuru-collections-row">
+<div class="ahuru-col-card">
+<div class="ahuru-col-card__media"><img src="https://cdn.shopify.com/s/files/1/0460/4851/0114/collections/christin-hume-0MoF-Fe0w0A-unsplash.jpg?v=1674099857" alt="Pure Essential Oils for Diffuser collection"></div>
+<div class="ahuru-col-card__meta">
+<h2>Pure Essential Oils for Diffuser</h2>
+<div class="ahuru-col-card__label">Diffuser-ready oils and blends</div>
+<p>Browse Āhuru diffuser oils and calming blends in one place, then pick the scent that fits your space.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oils-for-diffuser">Shop oils</a>
+</div>
+</div>
+<div class="ahuru-col-card">
+<div class="ahuru-col-card__media"><img src="https://cdn.shopify.com/s/files/1/0460/4851/0114/collections/1b57a8ecd243c3f82cbbe12693297e44.jpg?v=1665054664" alt="Essential Oil Diffuser collection"></div>
+<div class="ahuru-col-card__meta">
+<h2>Essential Oil Diffuser</h2>
+<div class="ahuru-col-card__label">Ultrasonic and electric diffusers</div>
+<p>Pair your oils with a diffuser that suits your room and routine.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oil-diffuser-nz">Shop diffusers</a>
+</div>
+</div>
+</div>
+</section>
+
+<section class="ahuru-section">
+<div class="ahuru-qp-head">
+<h2>How to choose the right oils for you? (Quick Picks)</h2>
+<p>Start here -  if you already know the kind of aromatherapy benefits you’re looking for. Each essential oil carries its own unique properties, so choosing based on how you want to feel is the easiest place to begin.</p>
+</div>
+<div class="ahuru-quick-picks">
+<div class="ahuru-pick">
+<div class="ahuru-pick__icon" aria-hidden="true">☾</div>
+<h3>Sleep &amp; relaxation</h3>
+<div class="ahuru-pick__tags">Lavender • Sandalwood • Frankincense</div>
+<p>Best for winding down, reducing stress, and improving sleep quality. Calming oils &amp; blends for evenings and bedrooms.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oil-for-sleep">→ Shop sleep &amp; relaxation oil</a>
+</div>
+<div class="ahuru-pick">
+<div class="ahuru-pick__icon" aria-hidden="true">✦</div>
+<h3>Anxiety &amp; Calm </h3>
+<div class="ahuru-pick__tags">Lavender • Patchouli • Frankincense</div>
+<p>Create a sense of calm, safety, and stillness, like your mind can finally slow down and breathe.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oil-for-sleep">→ Shop anxiety &amp; calm oil</a>
+</div>
+<div class="ahuru-pick">
+<div class="ahuru-pick__icon" aria-hidden="true">⌂</div>
+<h3>Fresh home &amp; clean air</h3>
+<div class="ahuru-pick__tags">Lemongrass • Tea Tree • Peppermint</div>
+<p>Create a clean, fresh-smelling space that feels light, open, and instantly refreshing.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/diffuser-oil-nz">→ Shop fresh &amp; clean home oil</a>
+</div>
+<div class="ahuru-pick">
+<div class="ahuru-pick__icon" aria-hidden="true">◆</div>
+<h3>Focus &amp; energy</h3>
+<div class="ahuru-pick__tags">Peppermint • Rosemary • Lemon</div>
+<p>Boost clarity, energy, and mental performance.  Fresh, bright scents for mornings and work sessions.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/diffuser-oil-nz">→ Shop focus &amp; energy oil </a>
+</div>
+<div class="ahuru-pick">
+<div class="ahuru-pick__icon" aria-hidden="true">♥</div>
+<h3>Mood Boost &amp; Hormonal Support</h3>
+<div class="ahuru-pick__tags">Orange • Ylang Ylang • Rose &amp; Geranium</div>
+<p>Lift your mood and create a soft, emotionally balanced atmosphere that feels warm, comforting, and gently uplifting.</p>
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/diffuser-oil-nz">→ Shop mood oils &amp; hormonal support oil</a>
+</div>
+</div>
+</section>
+
+<section class="ahuru-section ahuru-section--tight">
+<div class="ahuru-band-dark">
+<h2>Essential oils for a diffuser - What you need to know</h2>
+<p>Essential oils have been used for centuries for their aromatic and wellness benefits.</p>
+<p>A diffuser is one of the easiest ways to enjoy them at home. It disperses essential oil particles into the air, allowing you to shape how your space feels -  calm, energised, or refreshed.</p>
+<p>How it works:</p>
+<ul>
+<li>Add water (for ultrasonic diffusers)</li>
+<li>Add a few drops of essential oil</li>
+<li>Let the scent gently fill your space</li>
+</ul>
+<p>If you already know what you want, go straight to the quick picks below.</p>
+</div>
+</section>
+
+<section class="ahuru-section">
+<div class="ahuru-products-head">
+<h2>Top 8 best selling essential oil, blends &amp; bundles</h2>
+<p>If you’re unsure where to start -  start here.</p>
+<p>These are our most loved oils and blends, chosen by customers for their everyday use. Simple, reliable, and easy to enjoy - they take the guesswork out of finding the right scent.</p>
+</div>
+<div class="ahuru-products">
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/files/kelly-sikkema-XU1-sAMZFqc-unsplash_3.jpg?v=1695878306&amp;width=533" alt="Best Seller Essential Oil Blends Bundle"></div>
+<div class="ahuru-card-body">
+<h4>Best Seller Essential Oil Blends Bundle</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="8055577673890" data-template="index"></div></div>
+<div class="ahuru-price">NZ$85 sale</div>
+<p>A perfect start-bundle if you want multiple moods covered at once instead of choosing one bottle at a time.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/best-seller-essential-oil-blends-bundle">Shop bundle</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="43711535251618"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/products/58-_1.png?v=1679107657&amp;width=533" alt="Happy Essential Oil Blend"></div>
+<div class="ahuru-card-body">
+<h4>Happy Essential Oil Blend</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="7585517797538" data-template="index"></div></div>
+<div class="ahuru-price">NZ$25</div>
+<p>Bright, citrusy, and floral; a strong pick when you want the room to feel lighter, happier, and more uplifting.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/happy-essential-oil-blend">Shop Happy</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="42377605644450"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/products/57-_1.png?v=1679107634&amp;width=533" alt="Emotional Rescue Essential Oil Blend"></div>
+<div class="ahuru-card-body">
+<h4>Emotional Rescue Essential Oil Blend</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="7585583988898" data-template="index"></div></div>
+<div class="ahuru-price">NZ$25</div>
+<p>A calmer, softer blend aimed at slowing a busy mind and easing that overwhelmed feeling.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/emotional-rescue-essential-oil-blend">Shop Emotional Rescue</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="42377685434530"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/products/4-696496af-9c5c-48ed-916e-0a96adca3757-_1.png?v=1688818621&amp;width=533" alt="Anxiety Essential Oil Blend"></div>
+<div class="ahuru-card-body">
+<h4>Anxiety Essential Oil Blend</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="7791414771874" data-template="index"></div></div>
+<div class="ahuru-price">NZ$25</div>
+<p>Best seller for those who already know they want a calming, anxiety-supportive diffuser blend. Floral and woody with a citrus twist.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/anxiety-essential-oil">Shop Anxiety Blend</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="42979942236322"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/products/41-_1.png?v=1679107759&amp;width=1946" alt="Rose &amp; Geranium Essential Oil"></div>
+<div class="ahuru-card-body">
+<h4>Rose &amp; Geranium Essential Oil</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="6698100818082" data-template="index"></div></div>
+<div class="ahuru-price">NZ$25</div>
+<p>Sweet, floral, feminine, and gently spiced; ideal if you want something uplifting that still feels elegant and soothing.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/rose-geranium-essential-oil">Shop Rose &amp; Geranium</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="39727957311650"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/products/59-_1.png?v=1679107729&amp;width=533" alt="Relax Essential Oil Blend"></div>
+<div class="ahuru-card-body">
+<h4>Relax Essential Oil Blend</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="7585604468898" data-template="index"></div></div>
+<div class="ahuru-price">NZ$25</div>
+<p>Perfect for who came here specifically looking for a sleep or evening wind-down diffuser oil with deep woodsy smell. </p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/relax-essential-oil-blend">Shop Relax oils</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="42377709617314"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/files/amy-simpson-Ml8w9luuAHI-unsplash.jpg?v=1696932689&amp;width=533" alt="Women's Essential Oil Blend"></div>
+<div class="ahuru-card-body">
+<h4>Women's Essential Oil Blend</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="8070397395106" data-template="index"></div></div>
+<div class="ahuru-price">NZ$25</div>
+<p>Useful when you want a blend positioned around balance and wellbeing, while still keeping the scent ritual simple.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/womens-essential-oil-blend">Shop Women's Blend</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="43750895616162"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+<div class="ahuru-card">
+<div class="ahuru-card-image"><img src="https://www.ahurucandles.co.nz/cdn/shop/files/kateryna-hliznitsova-VBi2Bg7QuPs-unsplash.jpg?v=1696930644&amp;width=1946" alt="Lift-Me-Up Essential Oil Blend"></div>
+<div class="ahuru-card-body">
+<h4>Lift-Me-Up Essential Oil Blend</h4>
+<div class="ahuru-jdgm-wrap"><div class="jdgm-widget jdgm-preview-badge" data-id="8070386745506" data-template="index"></div></div>
+<div class="ahuru-price">NZ$20 sale</div>
+<p>An uplifting blend for readers who want a more energising or mood-boosting option without choosing a single-note oil.</p>
+<div class="ahuru-card-actions">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/products/lift-me-up-essential-oil-blend">Shop Lift-Me-Up</a>
+<form method="post" action="https://www.ahurucandles.co.nz/cart/add" accept-charset="UTF-8" class="ahuru-add-form"><input type="hidden" name="id" value="43750872023202"><input type="hidden" name="quantity" value="1"><button type="submit" class="ahuru-btn ahuru-btn-secondary">Add to cart</button></form>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="ahuru-section ahuru-section--tight">
+<div class="ahuru-guide-band">
+<h2>How do I use essential oils in my diffuser?</h2>
+<p>Using essential oils in a diffuser is one of the simplest ways to transform how your space feels; using them correctly makes a big difference in both scent quality and overall experience.</p>
+<div class="ahuru-two-col">
+<div class="ahuru-mini-card">
+<h3>How many drops of essential oil should you use?</h3>
+<p>As a general guide:</p>
+<p>• Small room: 3–5 drops<br> • Medium room: 5–7 drops<br> • Large room: 7–10 drops</p>
+<p>However, the “right” amount can vary depending on a few key factors:</p>
+<p>1. Strength of the oil<br> Some oils like peppermint, eucalyptus, or tea tree are naturally stronger and may require fewer drops. Softer oils like lavender or orange can be used more generously.</p>
+<p>2. Size and airflow of your space<br> Open-plan areas or rooms with high airflow may need slightly more oil, while smaller enclosed spaces need less.</p>
+<p>3. Personal sensitivity<br> If you’re new to essential oils or have a sensitive nose, always start with fewer drops. You can gradually increase once you know what feels comfortable.</p>
+<p>Tip: Start low and build up. It’s much easier to add more oil than to fix an overpowering scent.</p>
+</div>
+<div class="ahuru-mini-card">
+<h3>Do you mix essential oils with water in a diffuser?</h3>
+<p>This depends on the type of diffuser you’re using:</p>
+<p><strong>Ultrasonic diffusers (most common)</strong><br> Yes: always add water first, then essential oils.<br> These diffusers use water and ultrasonic vibrations to disperse a fine mist into the air.</p>
+<p><strong>Nebulising diffusers</strong><br> No water required.<br> These use pure essential oil and disperse it in a more concentrated form, which results in a stronger scent.</p>
+<p><strong>Evaporative or reed diffusers</strong><br> No water required, but they work differently and typically produce a lighter scent throw.</p>
+<p>If you’re unsure, always check your diffuser’s instructions; using the wrong method can affect both performance and longevity of the device.</p>
+</div>
+</div>
+<div class="ahuru-btn-row" style="margin-top:24px">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oil-diffuser-nz">Shop diffusers</a>
+<a class="ahuru-btn ahuru-btn-secondary" href="https://www.ahurucandles.co.nz/collections/essential-oils-for-diffuser">Shop essential oils</a>
+</div>
+</div>
+</section>
+
+<section class="ahuru-section ahuru-section--tight">
+<div class="ahuru-guide-band">
+<h2>How to safely diffuse essential oils</h2>
+<p>Essential oils are highly concentrated, so using them properly is important for both safety and effectiveness.</p>
+<div class="ahuru-two-col">
+<div class="ahuru-mini-card">
+<h3>What to avoid</h3>
+<p><strong>Carrier oils (e.g. coconut, almond, jojoba)</strong><br> These are designed for skin application, not diffusers. They can clog your device and leave residue.</p>
+<p><strong>Synthetic fragrance oils</strong><br> These may smell strong, but they don’t offer the same benefits as pure essential oils and can negatively impact air quality.</p>
+<p><strong>Thick or resin-heavy oils (in some diffusers)</strong><br> Certain oils like myrrh or very thick blends may not diffuse well in all devices.</p>
+</div>
+<div class="ahuru-mini-card">
+<h3>Best practice</h3>
+<p><strong>Diffuse in shorter sessions</strong><br> 30–60 minutes is ideal to enjoy the benefits without overwhelming your senses.</p>
+<p><strong>Clean your diffuser regularly</strong><br> Clean every 5–7 uses to prevent oil buildup, maintain performance, and keep scents pure.</p>
+<p><strong>Use high-quality essential oils</strong><br> Pure oils provide a cleaner, more balanced aroma and are less likely to cause irritation.</p>
+<p><strong>Ensure proper ventilation</strong><br> Especially in smaller spaces, allow fresh air to circulate.</p>
+<p><strong>Be mindful around pets and children</strong><br> Some essential oils can be too strong or unsuitable - always use gentler oils and diffuse in moderation.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="ahuru-section">
+<div class="ahuru-find-scent">
+<h2>Find your perfect scent</h2>
+<p>The best essential oil isn’t about what’s “best.”<br> It’s about how you want your home to feel.</p>
+<p>Calm. Clear. Focused. Fresh.</p>
+<p>Start with one mood, one blend, and one simple daily ritual.<br> Let it become something you return to, not just something you try once.</p>
+<p>Because when the scent is right, everything else begins to shift.</p>
+<div class="ahuru-btn-row">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/essential-oils-for-diffuser">→ Shop essential oils</a>
+<a class="ahuru-btn ahuru-btn-secondary" href="https://www.ahurucandles.co.nz/collections/essential-oil-diffuser-nz">→ Shop diffusers</a>
+</div>
+</div>
+<div class="ahuru-cta-banner">
+<h3>Ready to turn this guide into your next purchase?</h3>
+<p>Browse Ahuru’s diffuser oils, calming blends, and diffusers in one place - then choose the scent that fits how you want your home to feel today.</p>
+<div class="ahuru-btn-row" style="justify-content:center">
+<a class="ahuru-btn ahuru-btn-primary" href="https://www.ahurucandles.co.nz/collections/diffuser-oil-nz">Shop diffuser oils</a>
+<a class="ahuru-btn ahuru-btn-secondary" href="https://www.ahurucandles.co.nz/collections/essential-oil-diffuser-nz">Shop diffusers</a>
+</div>
+</div>
+</section>
+
+<section class="ahuru-conclusion">
+<h2>Conclusion </h2>
+<p>Now that you have a list of some of the best essential oils for diffusers, you can start experimenting and finding the ones that work best for you. Keep in mind that essential oils are highly concentrated, so it's important to use them sparingly and always follow the diffuser's instructions.</p>
+<p>It's also a good idea to do a patch test before using any new essential oil, especially if you have sensitive skin. To do a patch test, simply apply a small amount of the essential oil to a patch of skin and wait 24 hours to see if there is any irritation.</p>
+<p>In addition to using essential oils in a diffuser, you can also use them in other ways, such as adding them to a carrier oil for a massage or mixing them with water for a natural air freshener. The possibilities are endless, so have fun experimenting and finding the perfect blend of essential oils for your needs</p>
+</section>
+
+<div class="ahuru-faq-wrap">
+<h2>FAQ</h2>
+<details class="ahuru-details">
+<summary>What is the best essential oil for a diffuser? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>That depends on your goal. Lavender-style scents are better for winding down, while brighter blends like Happy or Lift-Me-Up suit daytime energy and mood.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Can I use any oil in my diffuser? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>No. Avoid carrier oils and synthetic fragrance oils. Use essential oils and blends intended for diffuser use.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>How often should I clean my diffuser? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>A simple rule is every 5–7 uses, or sooner if you rotate scents often.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Which oils are best for sleep? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Lavender, sandalwood, and softer calming blends are the best place to start for evening use.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Which essential oils are calming and relaxing? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Lavender, ylang-ylang, jasmine, frankincense, and sandalwood are popular essential oils known for their calming and relaxing properties.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>What essential oil is energizing? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Peppermint essential oil is known for its invigorating and energizing effects.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Which essential oils are refreshing? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Eucalyptus, lemon, tea tree, and mandarin essential oils have refreshing properties.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Can essential oils improve memory and cognitive function? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Yes, rosemary essential oil is known for its ability to improve memory and cognitive function.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Which essential oils can help reduce stress and improve mood? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Lavender, ylang-ylang, jasmine, frankincense, and sandalwood essential oils are often used to reduce stress and improve mood.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Can essential oils relieve congestion and respiratory issues? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Yes, eucalyptus, tea tree, rosemary, frankincense, and sandalwood essential oils are known for their respiratory benefits and can help relieve congestion.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Which essential oils can help with insomnia? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Lavender and jasmine essential oils are commonly used to aid with sleep and insomnia.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Are there essential oils that eliminate odors? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Lemon and mandarin essential oils are known for their ability to eliminate odors.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Can essential oils be used as natural cleaning agents? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Yes, tea tree and lemon essential oils can be used as natural cleaning agents.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Are there any potential side effects or precautions to consider when using essential oils in a diffuser? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>While essential oils are generally safe when used properly, it's important to be aware of potential allergies or sensitivities. Some essential oils may be harmful to pets, so take precautions if you have animals in your home. Additionally, pregnant women, individuals with certain medical conditions, or those taking specific medications should consult with a healthcare professional before using essential oils.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Where can I find essential oils and diffusers? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>You can find essential oils, diffusers, and other aromatherapy accessories online or at specialty stores that carry natural health and wellness products.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Do you offer a wide range of essential oils and diffusers? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Yes, we offer an extensive collection of essential oils, diffusers, and other aromatherapy accessories to suit various preferences and needs. Visit our store to explore the range of products available.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Can I mix different essential oils together in my diffuser? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Yes, you can create your own unique blend of essential oils by mixing different oils together in your diffuser. Experiment with various combinations to find the aroma that suits your preferences and desired therapeutic benefits.</p></div>
+</details>
+<details class="ahuru-details">
+<summary>Which oils make a home smell fresh? <span class="ahuru-details__chev">▼</span></summary>
+<div class="ahuru-details__body"><p>Eucalyptus, lemon, tea tree, and fresh floral-citrus blends tend to work best when your goal is a cleaner-smelling space.</p></div>
+</details>
+</div>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the best essential oil for a diffuser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "That depends on your goal. Lavender-style scents are better for winding down, while brighter blends like Happy or Lift-Me-Up suit daytime energy and mood."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use any oil in my diffuser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Avoid carrier oils and synthetic fragrance oils. Use essential oils and blends intended for diffuser use."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I clean my diffuser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A simple rule is every 5–7 uses, or sooner if you rotate scents often."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which oils are best for sleep?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lavender, sandalwood, and softer calming blends are the best place to start for evening use."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which essential oils are calming and relaxing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lavender, ylang-ylang, jasmine, frankincense, and sandalwood are popular essential oils known for their calming and relaxing properties."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What essential oil is energizing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Peppermint essential oil is known for its invigorating and energizing effects."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which essential oils are refreshing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Eucalyptus, lemon, tea tree, and mandarin essential oils have refreshing properties."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can essential oils improve memory and cognitive function?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, rosemary essential oil is known for its ability to improve memory and cognitive function."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which essential oils can help reduce stress and improve mood?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lavender, ylang-ylang, jasmine, frankincense, and sandalwood essential oils are often used to reduce stress and improve mood."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can essential oils relieve congestion and respiratory issues?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, eucalyptus, tea tree, rosemary, frankincense, and sandalwood essential oils are known for their respiratory benefits and can help relieve congestion."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which essential oils can help with insomnia?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lavender and jasmine essential oils are commonly used to aid with sleep and insomnia."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there essential oils that eliminate odors?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Lemon and mandarin essential oils are known for their ability to eliminate odors."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can essential oils be used as natural cleaning agents?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, tea tree and lemon essential oils can be used as natural cleaning agents."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there any potential side effects or precautions to consider when using essential oils in a diffuser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "While essential oils are generally safe when used properly, it's important to be aware of potential allergies or sensitivities. Some essential oils may be harmful to pets, so take precautions if you have animals in your home. Additionally, pregnant women, individuals with certain medical conditions, or those taking specific medications should consult with a healthcare professional before using essential oils."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where can I find essential oils and diffusers?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can find essential oils, diffusers, and other aromatherapy accessories online or at specialty stores that carry natural health and wellness products."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer a wide range of essential oils and diffusers?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we offer an extensive collection of essential oils, diffusers, and other aromatherapy accessories to suit various preferences and needs. Visit our store to explore the range of products available."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I mix different essential oils together in my diffuser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can create your own unique blend of essential oils by mixing different oils together in your diffuser. Experiment with various combinations to find the aroma that suits your preferences and desired therapeutic benefits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which oils make a home smell fresh?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Eucalyptus, lemon, tea tree, and fresh floral-citrus blends tend to work best when your goal is a cleaner-smelling space."
+      }
+    }
+  ]
+}
+</script>

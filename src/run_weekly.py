@@ -22,6 +22,7 @@ load_dotenv()
 # Add src/ to path so imports work when called from repo root
 sys.path.insert(0, os.path.dirname(__file__))
 
+from baseline_seo import enrich_weekly_analysis_shopify
 from gsc_fetch import fetch_all_data
 from analyse import analyse
 from report import generate_report, save_report
@@ -54,6 +55,7 @@ def main():
     print("\nSTEP 2: Analysing data")
     print("-" * 40)
     analysis = analyse(raw_data)
+    enrich_weekly_analysis_shopify(analysis)
 
     summary = analysis["summary"]
     print(f"\nSummary:")

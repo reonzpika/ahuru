@@ -129,6 +129,10 @@
           <p class="text-xs text-on-surface-variant font-medium">Review and apply optimisations</p>
         </div>
         <nav class="flex flex-col gap-1 font-body text-sm font-medium" id="sidebar-nav">
+          <button type="button" data-tab="dashboard" class="tab-btn flex items-center gap-3 rounded-full px-4 py-2 text-on-surface-variant hover:bg-surface-container-lowest/80 transition-all">
+            <span class="material-symbols-outlined text-xl">dashboard</span>
+            <span>Dashboard</span>
+          </button>
           <button type="button" data-tab="pending" class="tab-btn flex items-center gap-3 rounded-full px-4 py-2 transition-all bg-surface-container-lowest text-primary shadow-card">
             <span class="material-symbols-outlined text-xl">pending_actions</span>
             <span>Pending</span>
@@ -151,14 +155,14 @@
       <main class="flex-1 p-6 md:p-10 mb-24 md:mb-32">
         <!-- Summary bar (all tabs) -->
         <div id="summary-bar" class="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left">
+          <button type="button" id="summary-nav-pending" class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left w-full font-inherit transition-all hover:shadow-card-hover hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-label="Go to pending tasks">
             <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tasks Pending</p>
             <p id="stat-pending" class="text-2xl font-bold text-primary font-headline">—</p>
-          </div>
-          <div class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left">
+          </button>
+          <button type="button" id="summary-nav-applied" class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left w-full font-inherit transition-all hover:shadow-card-hover hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-label="Go to applied tasks">
             <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Tasks Applied</p>
             <p id="stat-applied-count" class="text-2xl font-bold text-primary font-headline">—</p>
-          </div>
+          </button>
           <div class="rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-card text-center sm:text-left" id="stat-ctr-wrap" title="">
             <p class="text-xs uppercase tracking-widest text-on-surface-variant mb-1">Avg CTR Lift</p>
             <p id="stat-ctr" class="text-2xl font-bold text-primary font-headline">—</p>
@@ -168,6 +172,40 @@
         <div id="fetch-error" class="hidden mb-6 rounded-xl bg-error-container px-4 py-3 text-on-error-container text-sm">
           ⚠ Could not load tasks. Check your connection and refresh.
         </div>
+
+        <!-- Dashboard overview -->
+        <section id="tab-dashboard" class="tab-panel hidden">
+          <header class="mb-8">
+            <h1 class="text-3xl font-extrabold text-on-surface font-headline tracking-tight mb-2">Dashboard</h1>
+            <p class="text-tertiary font-medium">Task summary and the latest week-on-week and month-on-month performance from published SEO reports.</p>
+          </header>
+          <div class="space-y-8">
+            <div class="rounded-2xl bg-surface-container-lowest p-6 md:p-8 shadow-card">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 class="text-xl font-bold text-on-surface font-headline">Week-on-Week Performance</h2>
+                <button type="button" id="dashboard-link-weekly-report" class="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-full border border-outline-variant/50 bg-surface px-4 py-2 text-sm font-semibold text-primary shadow-card hover:bg-surface-container-low transition-colors sm:self-auto">
+                  <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                  Open weekly report
+                </button>
+              </div>
+              <p id="dashboard-wow-error" class="hidden mb-0 rounded-lg bg-error-container px-3 py-2 text-sm text-on-error-container"></p>
+              <div id="dashboard-wow-loading" class="text-sm text-on-surface-variant py-4">Loading…</div>
+              <div id="dashboard-wow-content" class="report-markdown hidden max-w-none"></div>
+            </div>
+            <div class="rounded-2xl bg-surface-container-lowest p-6 md:p-8 shadow-card">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 class="text-xl font-bold text-on-surface font-headline">Month-on-Month Performance</h2>
+                <button type="button" id="dashboard-link-monthly-report" class="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-full border border-outline-variant/50 bg-surface px-4 py-2 text-sm font-semibold text-primary shadow-card hover:bg-surface-container-low transition-colors sm:self-auto">
+                  <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                  Open monthly report
+                </button>
+              </div>
+              <p id="dashboard-mom-error" class="hidden mb-0 rounded-lg bg-error-container px-3 py-2 text-sm text-on-error-container"></p>
+              <div id="dashboard-mom-loading" class="text-sm text-on-surface-variant py-4">Loading…</div>
+              <div id="dashboard-mom-content" class="report-markdown hidden max-w-none"></div>
+            </div>
+          </div>
+        </section>
 
         <!-- Pending -->
         <section id="tab-pending" class="tab-panel">
@@ -271,22 +309,26 @@
     </div>
 
     <!-- Mobile tab bar -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 flex justify-around border-t border-transparent bg-surface/90 px-2 py-3 backdrop-blur-md md:hidden shadow-[0_-4px_40px_rgba(27,28,25,0.06)]" id="mobile-tabs" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
-      <button type="button" data-tab="pending" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-primary">
-        <span class="material-symbols-outlined">pending_actions</span>
-        <span class="text-[10px] font-bold uppercase tracking-wider">Pending</span>
+    <nav class="fixed bottom-0 left-0 right-0 z-40 flex justify-around border-t border-transparent bg-surface/90 px-1 py-3 backdrop-blur-md md:hidden shadow-[0_-4px_40px_rgba(27,28,25,0.06)]" id="mobile-tabs" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+      <button type="button" data-tab="dashboard" class="mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[22px]">dashboard</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Home</span>
       </button>
-      <button type="button" data-tab="applied" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-on-surface-variant">
-        <span class="material-symbols-outlined">task_alt</span>
-        <span class="text-[10px] font-bold uppercase tracking-wider">Applied</span>
+      <button type="button" data-tab="pending" class="mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-primary">
+        <span class="material-symbols-outlined text-[22px]">pending_actions</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Pending</span>
       </button>
-      <button type="button" data-tab="dismissed" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-on-surface-variant">
-        <span class="material-symbols-outlined">cancel</span>
-        <span class="text-[10px] font-bold uppercase tracking-wider">Dismissed</span>
+      <button type="button" data-tab="applied" class="mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[22px]">task_alt</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Applied</span>
       </button>
-      <button type="button" data-tab="report" class="mobile-tab flex flex-col items-center gap-1 rounded-xl px-3 py-1 text-on-surface-variant">
+      <button type="button" data-tab="dismissed" class="mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[22px]">cancel</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Dismissed</span>
+      </button>
+      <button type="button" data-tab="report" class="mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-on-surface-variant">
         <span class="material-symbols-outlined text-[22px]">description</span>
-        <span class="text-[10px] font-bold uppercase tracking-wider">Report</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Report</span>
       </button>
     </nav>
 
@@ -368,6 +410,7 @@
   let dismissingId = null;
   let selectedIds = new Set();
   let weeklyReportInited = false;
+  let dashboardInited = false;
   let reportKind = 'weekly';
   let tasksLoadFailed = false;
 
@@ -1029,12 +1072,12 @@
           (pri ? '<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">' + esc(pri) + '</span>' : '') +
           '<div class="flex gap-6 text-right">' +
           '<div class="flex flex-col">' +
-          '<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Impr</span>' +
+          '<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Impr (90d)</span>' +
           '<span class="text-sm font-bold text-on-surface">' +
           esc(fmtImpr(task.impressions_at_creation)) +
           '</span></div>' +
           '<div class="flex flex-col">' +
-          '<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">CTR</span>' +
+          '<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">CTR (90d)</span>' +
           '<span class="text-sm font-bold text-on-surface">' +
           esc(fmtCtr(task.ctr_at_creation)) +
           '</span></div></div></div></div>' +
@@ -1175,7 +1218,7 @@
           }
           const imprLine =
             '<div class="flex flex-wrap items-center gap-2 text-sm">' +
-            '<span class="w-14 shrink-0 font-bold text-on-surface-variant">Impr</span>' +
+            '<span class="w-14 shrink-0 font-bold text-on-surface-variant" title="Before: 90-day GSC at task creation; after: last 28 days">Impr</span>' +
             '<span class="text-on-surface-variant">' +
             fmtImpr(imprBefore) +
             '</span>' +
@@ -1336,6 +1379,7 @@
     // Strip HTML file so /ahuru/dashboard.html -> /ahuru/
     if (last.includes('.')) {
       segments.pop();
+      if (segments.length === 0) return '/';
       return '/' + segments.join('/') + '/';
     }
     // Project root without trailing slash: /ahuru -> /ahuru/
@@ -1348,6 +1392,121 @@
 
   function reportFileUrl(name) {
     return reportSiteBase() + reportsPathPrefix() + '/' + encodeURIComponent(name);
+  }
+
+  function reportLatestMarkdownUrl(reportsPrefix) {
+    const base = reportSiteBase() + reportsPrefix + '/latest.md';
+    const sep = base.indexOf('?') === -1 ? '?' : '&';
+    return base + sep + 't=' + Date.now();
+  }
+
+  /**
+   * Returns Markdown from the first ## heading line that contains markerSubstring
+   * through the line before the next ## heading (h2 only; ### does not match).
+   */
+  function extractMarkdownSection(md, markerSubstring) {
+    if (!md || !markerSubstring) return '';
+    const lines = md.split(/\r?\n/);
+    let start = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/^\s*##\s+/.test(line) && line.indexOf(markerSubstring) !== -1) {
+        start = i;
+        break;
+      }
+    }
+    if (start === -1) return '';
+    const out = [];
+    for (let i = start; i < lines.length; i++) {
+      if (i > start && /^\s*##\s+/.test(lines[i])) break;
+      out.push(lines[i]);
+    }
+    return out.join('\n').trim();
+  }
+
+  function stripLeadingH2IfMatches(md, markerSubstring) {
+    const lines = md.split(/\r?\n/);
+    if (!lines.length) return md;
+    const first = lines[0];
+    if (/^\s*##\s+/.test(first) && first.indexOf(markerSubstring) !== -1) {
+      return lines.slice(1).join('\n').replace(/^\s*\n/, '').trim();
+    }
+    return md;
+  }
+
+  async function initDashboardPanel() {
+    const wowLoad = document.getElementById('dashboard-wow-loading');
+    const wowErr = document.getElementById('dashboard-wow-error');
+    const wowBody = document.getElementById('dashboard-wow-content');
+    const momLoad = document.getElementById('dashboard-mom-loading');
+    const momErr = document.getElementById('dashboard-mom-error');
+    const momBody = document.getElementById('dashboard-mom-content');
+
+    function prepCard(loadEl, errEl, bodyEl) {
+      loadEl.classList.remove('hidden');
+      errEl.classList.add('hidden');
+      errEl.textContent = '';
+      bodyEl.classList.add('hidden');
+      bodyEl.innerHTML = '';
+    }
+    prepCard(wowLoad, wowErr, wowBody);
+    prepCard(momLoad, momErr, momBody);
+
+    async function loadSection(url, marker, loadEl, errEl, bodyEl, notFoundMessage) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          loadEl.classList.add('hidden');
+          errEl.textContent =
+            res.status === 404
+              ? notFoundMessage
+              : notFoundMessage + ' (HTTP ' + res.status + ').';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        const fullMd = await res.text();
+        let slice = extractMarkdownSection(fullMd, marker);
+        loadEl.classList.add('hidden');
+        if (!slice) {
+          errEl.textContent = 'That section was not found in the latest report file.';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        slice = stripLeadingH2IfMatches(slice, marker);
+        if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+          bodyEl.innerHTML = marked.parse(slice, { mangle: false, headerIds: false });
+        } else {
+          bodyEl.innerHTML = '<pre class="whitespace-pre-wrap text-sm">' + esc(slice) + '</pre>';
+        }
+        bodyEl.classList.remove('hidden');
+      } catch (e) {
+        loadEl.classList.add('hidden');
+        errEl.textContent = e.message || String(e);
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    const wUrl = reportLatestMarkdownUrl(CONFIG.reportsPath);
+    const mUrl = reportLatestMarkdownUrl(CONFIG.reportsMonthlyPath);
+
+    await Promise.all([
+      loadSection(
+        wUrl,
+        'Week-on-Week Performance',
+        wowLoad,
+        wowErr,
+        wowBody,
+        'Weekly report could not be loaded.'
+      ),
+      loadSection(
+        mUrl,
+        'Month-on-Month Performance',
+        momLoad,
+        momErr,
+        momBody,
+        'Monthly report could not be loaded.'
+      ),
+    ]);
   }
 
   async function loadArchiveIndex() {
@@ -1457,6 +1616,24 @@
     await fetchAndRenderReport(sel.value);
   }
 
+  async function openReportTab(kind) {
+    reportKind = kind;
+    const alreadyInited = weeklyReportInited;
+    setTab('report');
+    if (alreadyInited) {
+      const titleEl = document.getElementById('report-panel-title');
+      const kindSel = document.getElementById('report-kind-select');
+      const sel = document.getElementById('report-archive-select');
+      if (titleEl && kindSel && sel) {
+        kindSel.value = reportKind;
+        titleEl.textContent = reportKind === 'monthly' ? 'Monthly SEO report' : 'Weekly SEO report';
+        await populateReportArchiveSelect();
+        sel.value = 'latest.md';
+        await fetchAndRenderReport(sel.value);
+      }
+    }
+  }
+
   function setTab(tab) {
     currentTab = tab;
     const sum = document.getElementById('summary-bar');
@@ -1473,6 +1650,11 @@
       if (tasksLoadFailed) {
         fe.classList.remove('hidden');
       }
+    }
+
+    if (tab === 'dashboard' && !dashboardInited) {
+      dashboardInited = true;
+      initDashboardPanel();
     }
 
     document.querySelectorAll('.tab-panel').forEach(function (el) {
@@ -1495,10 +1677,10 @@
       const t = btn.getAttribute('data-tab');
       if (t === tab) {
         btn.className =
-          'mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-primary';
+          'mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-primary';
       } else {
         btn.className =
-          'mobile-tab flex flex-col items-center gap-1 rounded-xl px-4 py-1 text-on-surface-variant';
+          'mobile-tab flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1 text-on-surface-variant';
       }
     });
   }
@@ -1554,7 +1736,7 @@
         return;
       }
       err.classList.add('hidden');
-      sessionStorage.setItem(PAT_KEY, raw);
+      localStorage.setItem(PAT_KEY, raw);
       CONFIG.pat = raw;
       document.getElementById('pat-modal').classList.add('hidden');
       document.getElementById('app-root').classList.remove('hidden');
@@ -1571,6 +1753,19 @@
         const t = btn.getAttribute('data-tab');
         if (t) setTab(t);
       });
+    });
+
+    document.getElementById('summary-nav-pending').addEventListener('click', function () {
+      setTab('pending');
+    });
+    document.getElementById('summary-nav-applied').addEventListener('click', function () {
+      setTab('applied');
+    });
+    document.getElementById('dashboard-link-weekly-report').addEventListener('click', function () {
+      void openReportTab('weekly');
+    });
+    document.getElementById('dashboard-link-monthly-report').addEventListener('click', function () {
+      void openReportTab('monthly');
     });
 
     document.getElementById('pending-list').addEventListener('change', function (e) {
@@ -1727,7 +1922,7 @@
   }
 
   function boot() {
-    const stored = sessionStorage.getItem(PAT_KEY);
+    const stored = localStorage.getItem(PAT_KEY);
     if (stored) {
       CONFIG.pat = stored;
       document.getElementById('pat-modal').classList.add('hidden');

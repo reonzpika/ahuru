@@ -368,7 +368,7 @@ def _escape(s):
 
 
 def _ready_to_apply_rows(tasks):
-    """Table rows for auto_apply True: Priority, Handle, Proposed SEO Title, Proposed Description, Impressions, CTR."""
+    """Table rows for auto_apply True: Priority, Handle, Proposed SEO Title, Proposed Description, Impressions (90d), CTR (90d)."""
     rows = []
     for c in tasks:
         priority = c.get("priority", "")
@@ -415,7 +415,7 @@ def _approval_email_html(manifest_filename, changes, report_date, backlog_pendin
     header_ready = (
         f"<tr><th style=\"{th_style}\">Priority</th><th style=\"{th_style}\">Handle</th>"
         f"<th style=\"{th_style}\">Proposed SEO Title</th><th style=\"{th_style}\">Proposed Description</th>"
-        f"<th style=\"{th_style}\">Impressions</th><th style=\"{th_style}\">CTR</th></tr>"
+        f"<th style=\"{th_style}\">Impressions (90d at task creation)</th><th style=\"{th_style}\">CTR (90d)</th></tr>"
     )
     header_awareness = (
         f"<tr><th style=\"{th_style}\">Priority</th><th style=\"{th_style}\">Handle</th>"
